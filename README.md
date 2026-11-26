@@ -13,6 +13,8 @@ App web (computador y celular) para registrar pacientes, consultas e historial c
 | `config.js` | **Aquí pegas los datos de tu proyecto de Supabase** |
 | `logo.png` | Logo de la clínica |
 | `vendor/supabase.js` | Librería oficial de Supabase (v2.119.0), incluida para no depender de otros sitios |
+| `vendor/xlsx.full.min.js` | Librería SheetJS (v0.18.5) para generar el respaldo en Excel |
+| `privacidad.html` | Política de privacidad y condiciones de uso (enlazada en Google) |
 | `supabase/schema.sql` | Crea las tablas y las reglas de seguridad en Supabase |
 
 ---
@@ -123,7 +125,12 @@ Como solo pide nombre y correo, el inicio con Google no necesita la verificació
 
 ## Cuidados importantes
 
-- **Respaldos:** el plan gratuito de Supabase no incluye respaldos diarios automáticos. Una vez por semana exporta las tablas en **Table Editor** (elige el schema `vet` arriba a la izquierda) → (tabla) → **Export → CSV**, y guárdalas en un lugar seguro. Las tablas son `pacientes`, `consultas`, `perfiles` y `eventos`.
+- **Respaldos (una vez por semana):** el plan gratuito de Supabase no incluye respaldos diarios automáticos. Hay dos formas de sacarlos:
+  1. **Desde la app (recomendado):** entra como administrador → **Equipo → Respaldo de datos**.
+     - **Descargar Excel (.xlsx):** hojas de Pacientes, Consultas, Registro de cambios y Equipo, cada dato en su columna.
+     - **Descargar respaldo completo (.json):** copia técnica exacta, para restaurar si hiciera falta.
+     Guarda ambos en una carpeta con la fecha en Drive u OneDrive.
+  2. **Desde Supabase:** **Editor de tablas** → arriba a la izquierda cambia el schema de `public` a **`vet`** → abre cada tabla (`pacientes`, `consultas`, `eventos`, `perfiles`) → **Exportar → Exportar como CSV**. Ojo: los datos de cada ficha vienen en una sola columna `datos` (formato JSON).
 - **Proyecto en pausa:** Supabase pausa los proyectos gratuitos después de 1 semana sin uso. Como ahora comparte proyecto con Tu_Cita, basta con que cualquiera de las dos apps se use. Si se pausa, se reactiva desde el panel de Supabase.
 - **Espacio:** el plan gratuito tiene 500 MB de base de datos para todo el proyecto (hoy usas 29 MB). Las fichas son texto y ocupan poco; si algún día se llena, ahí conviene pasar a Pro o a un proyecto propio.
 - **Datos personales:** la app guarda RUT, teléfonos y direcciones de tutores. Aprueba solo a personas de la clínica y quita el acceso a quien deje de trabajar ahí.

@@ -126,10 +126,19 @@ function ready() {
 }
 
 /* ---------- Carga de datos ---------- */
+async function fetchAll(table, orderCol, asc = true) {
+  // Supabase entrega como máximo 1000 filas por consulta: se piden por páginas
+  const out = [], step = 1000;
+  for (let from = 0; ; from += step) {
+    const rows = await q(sb.from(table).select('*').order(orderCol, { ascending: asc }).range(from, from + step - 1));
+    out.push(...rows);
+    if (rows.length < step) return out;
+  }
+}
 async function loadAll() {
   const [eq, pa, fe, ct] = await Promise.all([
     q(sb.from('perfiles').select('*').order('nombre')),
-    q(sb.from('pacientes').select('*').order('actualizado_en', { ascending: false }).limit(5000)),
+    fetchAll('pacientes', 'actualizado_en', false),
     q(sb.from('consultas').select('*').order('creado_en', { ascending: false }).limit(60)),
     q(sb.from('consultas').select('*').gte('proximo_control', today()).order('proximo_control').limit(300))
   ]);
@@ -462,6 +471,7 @@ function renderTeam() {
   const row = (id, actions) => `<div class="fi" style="cursor:default"><span class="av">${esc(initials(who(id)))}</span><span><b>${esc(who(id))}</b>${id === myId ? ' <span class="pill">Tú</span>' : ''}${equipo[id].rol === 'admin' ? ' <span class="pill am">Admin</span>' : ''}<br><span class="muted small">${esc(whoRole(id))}${equipo[id].registro ? ' · ' + esc(equipo[id].registro) : ''}${equipo[id].email ? ' · ' + esc(equipo[id].email) : ''}</span></span><span class="row" style="gap:6px;justify-content:flex-end">${actions}</span></div>`;
   $('#teamList').innerHTML = activos.length ? activos.map((id) => row(id, isAdmin && id !== myId ? `<button class="b sm" data-adm="rol" data-id="${esc(id)}">${equipo[id].rol === 'admin' ? 'Quitar admin' : 'Hacer admin'}</button><button class="b sm danger" data-adm="off" data-id="${esc(id)}">Quitar acceso</button>` : '')).join('') : '<div class="empty">Cargando…</div>';
   $('#pendCard').classList.toggle('hide', !isAdmin || !pend.length);
+  renderRespaldo();
   $('#pendList').innerHTML = pend.map((id) => row(id, `<button class="b sm pri" data-adm="on" data-id="${esc(id)}">Aprobar</button>`)).join('');
 }
 async function adminAction(e) {
@@ -477,6 +487,97 @@ $('#teamList').addEventListener('click', adminAction);
 $('#pendList').addEventListener('click', adminAction);
 $('#btnCopyUrl').onclick = async () => { const u = location.origin + location.pathname; try { await navigator.clipboard.writeText(u); toast('Dirección copiada'); } catch { toast(u); } };
 
+
+
+/* ---------- Respaldo (solo administradores) ---------- */
+const stampFile = () => { const d = new Date(), p = (n) => String(n).padStart(2, '0'); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}`; };
+const clinicSlug = () => (CFG.NOMBRE_CLINICA || 'clinica').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '');
+function bajar(blob, name) {
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+function cargarXLSX() {
+  if (window.XLSX) return Promise.resolve();
+  return new Promise((res, rej) => { const sc = document.createElement('script'); sc.src = 'vendor/xlsx.full.min.js'; sc.onload = res; sc.onerror = () => rej(new Error('No se pudo cargar la librería de Excel')); document.head.appendChild(sc); });
+}
+async function datosRespaldo() {
+  const [perfiles, pacs, cons, evs] = await Promise.all([fetchAll('perfiles', 'creado_en'), fetchAll('pacientes', 'numero'), fetchAll('consultas', 'fecha'), fetchAll('eventos', 'en')]);
+  return { perfiles, pacs, cons, evs };
+}
+const fdt = (iso) => iso ? new Date(iso).toLocaleString('es-CL') : '';
+const nom = (eq, id) => (id && eq[id]?.nombre) || '';
+function hojas({ perfiles, pacs, cons, evs }) {
+  const eq = Object.fromEntries(perfiles.map((r) => [r.id, r]));
+  const P = pacs.map(rowPac), byId = Object.fromEntries(P.map((p) => [p.id, p]));
+  const vacCols = [...VAC.gen, ...VAC.fel, ...VAC.can];
+  const pacientes = P.map((p) => {
+    const o = {
+      'N° ficha': p.numero, 'Nombre': p.nombre, 'Especie': p.especie || '', 'Raza': p.raza || '', 'Sexo': p.sexo || '',
+      'Fecha nacimiento': fDate(p.fechaNac), 'Fecha aproximada': p.fechaAprox ? 'Sí' : '', 'Edad': ageOf(p), 'Color': p.color || '', 'Marca / señas': p.marca || '',
+      'Microchip': p.microchip?.tiene || '', 'N° microchip': p.microchip?.numero || '', 'Esterilizado': p.esterilizado || '',
+      'Tutor': p.tutor?.nombre || '', 'RUT tutor': p.tutor?.rut || '', 'Teléfono': p.tutor?.telefono || '', 'Correo tutor': p.tutor?.email || '', 'Dirección': p.tutor?.direccion || ''
+    };
+    vacCols.forEach(([k, l]) => { const v = p.vacunas?.[k] || {}; o[l] = [v.aplicada, fDate(v.fecha)].filter(Boolean).join(' '); });
+    Object.assign(o, {
+      'Desparasitación interna': p.desparasitacion?.interna || '', 'Desparasitación externa': p.desparasitacion?.externa || '', 'Producto desparasitación': p.desparasitacion?.producto || '',
+      'Dueños anteriores': (p.tutoresAnteriores || []).map((t) => `${t.nombre || ''} ${t.rut || ''} (hasta ${fDate(t.hasta)})`.trim()).join(' | '),
+      'Ficha creada por': nom(eq, p.creadoPor), 'Creada': fdt(p.creado), 'Último cambio por': nom(eq, p.actualizadoPor), 'Último cambio': fdt(p.actualizado)
+    });
+    return o;
+  });
+  const consultas = cons.map(rowCon).map((c) => {
+    const p = byId[c.pacienteId] || {}, d = c.dieta || {}, k = c.constantes || {}, ext = isExt(c);
+    return {
+      'N° ficha': p.numero || '', 'Paciente': p.nombre || '', 'Fecha': fDate(c.fecha), 'Tipo': c.tipo || 'Consulta', 'Motivo': c.motivo || '',
+      'Médico tratante': ext ? '' : nom(eq, c.medicoId), 'Clínica externa': ext ? c.externo?.clinica || '' : '', 'Veterinario externo': ext ? c.externo?.veterinario || '' : '',
+      'Anamnesis remota': c.anamnesisRemota || '', 'Anamnesis actual': c.anamnesisActual || '',
+      'Dieta seca': d.seca || '', 'Dieta húmeda': d.humeda || '', 'Dieta casera': d.casera || '', 'Frecuencia': d.frecuencia || '', 'Cantidad': d.cantidad || '', 'Dieta otros': d.otros || '',
+      'Enfermedades previas': c.enfermedadesPrevias || '', 'Tratamiento previo': c.tratamientoPrevio?.si || '', 'Cuál tratamiento': c.tratamientoPrevio?.cual || '', 'Alergias': c.alergias || '',
+      'Peso (kg)': k.peso || '', 'T° (°C)': k.temp || '', 'FC': k.fc || '', 'FR': k.fr || '', 'Pulso': k.pulso || '', 'TLLC': k.tllc || '', '% DH': k.dh || '', 'Mucosas': k.mucosas || '', 'CC': k.cc || '',
+      'Examen físico': c.examenFisico || '', 'Exámenes complementarios': c.examenesComplementarios || '', 'Prediagnósticos': c.prediagnosticos || '', 'Indicaciones': c.indicaciones || '',
+      'Próximo control': fDate(c.proximoControl), 'Registrada por': nom(eq, c.creadoPor), 'Creada': fdt(c.creado), 'Último cambio por': nom(eq, c.actualizadoPor), 'Último cambio': fdt(c.actualizado)
+    };
+  });
+  const cambios = evs.map((e) => ({ 'Fecha y hora': fdt(e.en), 'N° ficha': byId[e.paciente_id]?.numero || '', 'Paciente': byId[e.paciente_id]?.nombre || '(eliminado)', 'Cambio': e.tipo, 'Detalle': e.detalle || '', 'Por': nom(eq, e.por) }));
+  const equipoH = perfiles.map((r) => ({ 'Nombre': r.nombre, 'Cargo': r.cargo, 'Registro': r.registro || '', 'Correo': r.email || '', 'Rol': r.rol, 'Acceso': r.activo ? 'Activo' : 'Pendiente / sin acceso', 'Desde': fdt(r.creado_en) }));
+  return { Pacientes: pacientes, Consultas: consultas, 'Registro de cambios': cambios, Equipo: equipoH };
+}
+async function exportar(tipo, btn) {
+  if (!isAdmin) return;
+  btn.disabled = true; const txt = btn.textContent; btn.textContent = 'Preparando…';
+  try {
+    const data = await datosRespaldo();
+    const base = `Respaldo_${clinicSlug()}_${stampFile()}`;
+    if (tipo === 'xlsx') {
+      await cargarXLSX();
+      const wb = XLSX.utils.book_new(), H = hojas(data);
+      Object.entries(H).forEach(([nombre, filas]) => {
+        const ws = XLSX.utils.json_to_sheet(filas.length ? filas : [{ '(sin datos)': '' }]);
+        const cols = Object.keys(filas[0] || { x: 1 });
+        ws['!cols'] = cols.map((c) => ({ wch: Math.min(48, Math.max(c.length, ...filas.slice(0, 200).map((f) => String(f[c] ?? '').length)) + 2) }));
+        XLSX.utils.book_append_sheet(wb, ws, nombre);
+      });
+      XLSX.writeFile(wb, base + '.xlsx', { compression: true });
+    } else {
+      const json = { app: 'TuCita Vet', clinica: CFG.NOMBRE_CLINICA || '', exportado: new Date().toISOString(), exportado_por: me?.email || '', schema: CFG.SCHEMA || 'vet',
+        perfiles: data.perfiles, pacientes: data.pacs, consultas: data.cons, eventos: data.evs };
+      bajar(new Blob([JSON.stringify(json, null, 2)], { type: 'application/json' }), base + '.json');
+    }
+    try { localStorage.setItem('ultimoRespaldo', new Date().toISOString()); } catch {}
+    toast(`Respaldo descargado: ${data.pacs.length} pacientes, ${data.cons.length} consultas`);
+    renderRespaldo();
+  } catch (err) { banner('No se pudo generar el respaldo: ' + (err.message || err)); }
+  finally { btn.disabled = false; btn.textContent = txt; }
+}
+function renderRespaldo() {
+  $('#respCard').classList.toggle('hide', !isAdmin);
+  let u = null; try { u = localStorage.getItem('ultimoRespaldo'); } catch {}
+  const dias = u ? Math.floor((Date.now() - new Date(u)) / 864e5) : null;
+  $('#respUltimo').textContent = u ? `Último respaldo desde este equipo: ${fdt(u)}${dias >= 7 ? ' · ya pasó una semana, conviene sacar uno nuevo' : ''}` : 'Aún no has descargado un respaldo desde este equipo.';
+  $('#respUltimo').classList.toggle('am', dias == null || dias >= 7);
+}
+$('#btnRespXlsx').onclick = (e) => exportar('xlsx', e.currentTarget);
+$('#btnRespJson').onclick = (e) => exportar('json', e.currentTarget);
 
 /* ---------- Inicio de sesión ---------- */
 let authMode = 'in', inRecovery = /type=recovery/.test(location.hash);

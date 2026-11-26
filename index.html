@@ -240,6 +240,12 @@ body.auth .authw{display:grid}
 <section id="vEquipo" class="g hide">
   <div class="row"><h1>Equipo clínico</h1><button class="b sp" id="btnPerfil2">Editar mi perfil</button></div>
   <div class="card" style="padding:6px 14px"><div class="feed" id="teamList"></div></div>
+  <div class="card g hide" id="respCard"><h2>Respaldo de datos</h2>
+    <p class="muted" style="margin:0">Descarga una copia de todas las fichas. Hazlo una vez por semana y guárdala en tu Drive u OneDrive. Solo los administradores ven esta sección.</p>
+    <p class="pill" id="respUltimo" style="white-space:normal;justify-self:start;margin:0"></p>
+    <div class="row"><button class="b pri" id="btnRespXlsx">Descargar Excel (.xlsx)</button><button class="b" id="btnRespJson">Descargar respaldo completo (.json)</button></div>
+    <p class="muted small" style="margin:0">El Excel trae una hoja de Pacientes, una de Consultas, una del Registro de cambios y una del Equipo, cada dato en su columna, listo para leer. El .json es la copia técnica exacta de la base de datos, para restaurar si algún día hiciera falta.</p>
+  </div>
   <div class="card g hide" id="pendCard"><h2>Esperando aprobación</h2><div class="feed" id="pendList"></div></div>
   <div class="card g"><h2>Sumar a alguien del equipo</h2><p class="muted" style="margin:0">Envíale la dirección de esta página. Que cree su cuenta con su correo o con Google; aparecerá en “Esperando aprobación” y un administrador la aprueba. Desde ahí, todo lo que registre quedará firmado con su nombre.</p><div class="row"><button class="b sm" id="btnCopyUrl">Copiar dirección de la app</button></div></div>
 </section>
