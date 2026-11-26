@@ -116,6 +116,88 @@ legend{font:700 16px Figtree,sans-serif;padding:0 6px}
 .log:first-child{border-top:0}
 .tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--soft);color:var(--ink)}
 .tag.ext{background:var(--amber-bg);color:var(--amber)}
+
+.topbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.gsearch{position:relative;flex:1 1 320px;max-width:640px}
+.gsearch input{padding-left:42px;min-height:48px;border-radius:12px}
+.gsearch>svg{position:absolute;left:13px;top:14px;color:var(--mute);pointer-events:none}
+.gres{position:absolute;left:0;right:0;top:calc(100% + 6px);background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 14px 34px rgba(0,0,0,.2);z-index:9;max-height:60vh;overflow:auto;padding:6px}
+.gres button{display:grid;grid-template-columns:auto minmax(0,1fr);gap:0 10px;align-items:center;width:100%;text-align:left;background:none;border:0;border-radius:8px;padding:8px;font:inherit;color:var(--ink);cursor:pointer;min-height:48px}
+.gres button:hover,.gres button.on{background:var(--soft)}
+.gres .av{grid-row:span 2}
+.hero{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px;justify-content:space-between}
+.hero h1{font-size:clamp(28px,4.5vw,40px)}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;text-align:left;font:inherit;color:var(--ink);cursor:pointer;min-height:96px;display:flex;flex-direction:column;justify-content:space-between;gap:6px}
+.kpi:hover{border-color:var(--acc)}
+.kpi b{display:block;font-size:clamp(28px,3.4vw,38px);font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+.kpi span{font-size:14px;color:var(--mute)}
+.kpi.hl{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}.kpi.hl span{color:inherit;opacity:.85}
+.cols2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
+.av.fel{background:var(--amber-bg);color:var(--amber)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chip{font:600 13px Figtree,sans-serif;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--field);color:var(--ink);cursor:pointer;min-height:34px}
+.chip:hover{border-color:var(--acc)}
+#printArea{display:none}
+@media print{
+  @page{size:A4;margin:16mm 14mm}
+  body{background:#fff!important;color:#111!important;font-size:11pt}
+  body>*:not(#printArea){display:none!important}
+  #printArea{display:block!important;color:#111}
+  #printArea h1{font-size:18pt;margin:0}#printArea h2{font-size:12.5pt;margin:14pt 0 4pt;border-bottom:1px solid #999;padding-bottom:2pt}
+  #printArea table{width:100%;border-collapse:collapse;font-size:10pt}#printArea td{padding:2pt 6pt 2pt 0;vertical-align:top;border:0;white-space:normal}
+  #printArea td.k{color:#555;width:28%}
+  .pr-head{display:flex;align-items:center;gap:12pt;border-bottom:2px solid #1D5C4D;padding-bottom:8pt;margin-bottom:8pt}
+  .pr-head img{width:56pt;height:56pt;object-fit:contain}
+  .pr-con{break-inside:avoid-page;margin-bottom:10pt}
+  .pr-sec{margin:4pt 0}.pr-sec b{display:block;font-size:9.5pt;color:#444}.pr-sec p{margin:0;white-space:pre-wrap}
+  .pr-firma{margin-top:36pt;display:flex;justify-content:flex-end}.pr-firma div{border-top:1px solid #111;padding-top:4pt;min-width:220pt;text-align:center;font-size:10pt}
+  .pr-foot{margin-top:18pt;font-size:8.5pt;color:#666}
+}
+@media(max-width:899px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.cols2{grid-template-columns:minmax(0,1fr)}}
+
+.only-m{display:none}
+.fi>.pill{justify-self:start;align-self:start}
+.sheet{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:14;display:none;align-items:flex-end}
+.sheet.on{display:flex}
+.sheet>div{background:var(--card);width:100%;border-radius:18px 18px 0 0;padding:10px 12px calc(16px + env(safe-area-inset-bottom));display:grid;gap:4px}
+.sheet .nav{flex-direction:row;justify-content:flex-start;font-size:16px;min-height:52px;padding:0 14px;text-align:left}
+.tbl td.money,.money{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.agbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.agbar h2{font-size:20px;min-width:0}
+.slot{display:grid;grid-template-columns:64px minmax(0,1fr);gap:10px;border-top:1px solid var(--line);padding:6px 0;min-height:52px}
+.slot:first-child{border-top:0}
+.slot>time{font:700 14px Figtree,sans-serif;color:var(--mute);padding-top:10px;font-variant-numeric:tabular-nums}
+.slot.now>time{color:var(--acc)}
+.slotfree{border:1px dashed var(--line);background:none;border-radius:10px;color:var(--mute);font:500 14px Figtree,sans-serif;min-height:42px;cursor:pointer;text-align:left;padding:0 12px;width:100%}
+.slotfree:hover{border-color:var(--acc);color:var(--acc)}
+.cita{border:1px solid var(--line);border-left:5px solid var(--acc);border-radius:10px;padding:8px 12px;background:var(--card);display:grid;gap:4px;margin-bottom:6px}
+.cita.st-confirmada{border-left-color:#2E7D4F}.cita.st-atendida{border-left-color:var(--mute);opacity:.75}.cita.st-cancelada,.cita.st-no_asistio{border-left-color:var(--warn);opacity:.6}
+.cita .acts{display:flex;flex-wrap:wrap;gap:6px}
+.cita .acts .b{min-height:36px;padding:0 10px;font-size:13px}
+.week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
+.wday{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px;min-height:140px;display:grid;align-content:start;gap:6px}
+.wday h3{font-size:13px;margin:0 0 2px}
+.wday.today{border-color:var(--acc);box-shadow:inset 0 3px 0 var(--acc)}
+.wc{font:inherit;text-align:left;border:0;border-left:4px solid var(--acc);background:var(--soft);border-radius:6px;padding:4px 6px;font-size:12px;color:var(--ink);cursor:pointer;line-height:1.3}
+.wc.st-cancelada,.wc.st-no_asistio{opacity:.5;text-decoration:line-through}.wc.st-confirmada{border-left-color:#2E7D4F}
+.st{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--soft);white-space:nowrap}
+.st.confirmada{background:#DCF0E3;color:#1F5E38}.st.atendida{background:var(--line)}.st.cancelada,.st.no_asistio{background:var(--warn-bg);color:var(--warn)}
+.wa{background:#1F8F4E!important;border-color:#1F8F4E!important;color:#fff!important}
+.items{width:100%;border-collapse:collapse;min-width:640px}
+.items th{font-size:12px;color:var(--mute);text-align:left;padding:6px}
+.items td{padding:4px;vertical-align:top}
+.items input,.items select{min-height:40px;padding:6px 8px}
+.totales{display:grid;grid-template-columns:auto auto;gap:4px 18px;justify-content:end;font-variant-numeric:tabular-nums}
+.totales .tt{font-size:20px;font-weight:800}
+.low{color:var(--warn);font-weight:700}
+.selpac{display:flex;align-items:center;gap:10px;border:1px solid var(--acc);background:var(--soft);border-radius:10px;padding:8px 12px}
+@media(max-width:899px){
+  .side .nav.mm{display:none}
+  .side .only-m{display:flex}
+  .week{grid-template-columns:minmax(0,1fr)}
+  .wday{min-height:0}
+}
 .hide{display:none!important}
 @media(max-width:899px){.filters{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.filters>label:first-child{grid-column:1/-1}}
 @media(max-width:899px){
@@ -161,9 +243,20 @@ body.auth .authw{display:grid}
     <label class="f hide" id="lNombre">Nombre y apellido<input id="aNombre" autocomplete="name"></label>
     <label class="f">Correo electrónico<input id="aEmail" type="email" autocomplete="email" inputmode="email"></label>
     <label class="f">Contraseña<input id="aPass" type="password" autocomplete="current-password" minlength="8"></label>
+    <div class="row" style="justify-content:flex-end;margin-top:-8px"><button type="button" class="linkb" id="btnOlvide">¿Olvidaste tu contraseña?</button></div>
     <p class="msg hide" id="aMsg" role="status"></p>
     <button class="b pri" type="submit" id="aSubmit">Ingresar</button>
-    <button type="button" class="linkb" id="btnOlvide">¿Olvidaste tu contraseña?</button>
+  </form>
+
+  <!-- Recuperar contraseña -->
+  <form id="pRecuperar" class="card g hide" novalidate>
+    <h2>Recuperar contraseña</h2>
+    <p class="muted" style="margin:0">Escribe el correo con el que te registraste. Te enviaremos un enlace para crear una contraseña nueva.</p>
+    <label class="f">Correo electrónico<input id="rEmail" type="email" autocomplete="email" inputmode="email"></label>
+    <p class="msg hide" id="rMsg" role="status"></p>
+    <button class="b pri" type="submit" id="rSubmit">Enviar enlace de recuperación</button>
+    <button type="button" class="linkb" id="btnVolverLogin">← Volver a ingresar</button>
+    <p class="muted small" style="margin:0">¿Entras con Google? No necesitas contraseña: vuelve y usa “Continuar con Google”.</p>
   </form>
 
   <!-- Nueva contraseña (al volver del correo de recuperación) -->
@@ -192,10 +285,16 @@ body.auth .authw{display:grid}
 <div class="app">
 <nav class="side" aria-label="Menú">
   <div class="brand"><span class="mark" role="img" aria-label="Logo de la clínica"></span><span>TuCita Vet<small>Fichas clínicas</small></span></div>
-  <button class="nav on" data-nav="vLista"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>Pacientes</button>
-  <button class="nav" data-nav="vActividad"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>Actividad</button>
-  <button class="nav" data-nav="vControles"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>Controles</button>
-  <button class="nav" data-nav="vEquipo"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M17 14c2.3 0 4 1.5 4.6 4"/></svg>Equipo</button>
+  <button class="nav on" data-nav="vInicio"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>Inicio</button>
+  <button class="nav" data-nav="vAgenda"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/><path d="M8 14h3v3H8z"/></svg>Agenda</button>
+  <button class="nav" data-nav="vLista"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>Pacientes</button>
+  <button class="nav" data-nav="vTutores"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="7" r="3"/><path d="M2.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"/><circle cx="17" cy="14" r="1.6"/><circle cx="14.6" cy="11.2" r="1"/><circle cx="17" cy="10.2" r="1"/><circle cx="19.4" cy="11.2" r="1"/></svg>Tutores</button>
+  <button class="nav mm" data-nav="vControles"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>Controles</button>
+  <button class="nav mm" data-nav="vCotizaciones"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></svg>Cotizaciones</button>
+  <button class="nav mm" data-nav="vInventario"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l9-5 9 5v8l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>Inventario</button>
+  <button class="nav mm" data-nav="vActividad"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>Actividad</button>
+  <button class="nav mm" data-nav="vEquipo"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M17 14c2.3 0 4 1.5 4.6 4"/></svg>Equipo</button>
+  <button class="nav only-m" id="btnMas" aria-haspopup="true"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>Más</button>
   <button class="me" id="meBtn" aria-label="Mi perfil"><span class="av" id="meAv">?</span><span><b id="meName" style="display:block;font-size:14px">Mi perfil</b><span class="muted small" id="meRole"></span></span></button>
   <button class="nav hide-m" id="btnSalir3" style="margin-top:6px"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l5-5-5-5M15 12H3"/></svg>Cerrar sesión</button>
 </nav>
@@ -203,10 +302,38 @@ body.auth .authw{display:grid}
 <div>
 <div class="topm"><span class="mark" role="img" aria-label="Logo de la clínica" style="width:38px;height:38px;color:var(--acc)"></span><b style="font-size:18px;font-weight:800">TuCita Vet</b><button class="av sp" id="meBtnM" aria-label="Mi perfil" style="border:0;cursor:pointer;font:inherit;font-weight:700">?</button></div>
 <main>
+<div class="topbar">
+  <div class="gsearch" role="search"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+    <input id="gq" type="search" placeholder="Buscar paciente, tutor, RUT, teléfono o microchip" aria-label="Buscar paciente o tutor" autocomplete="off">
+    <div id="gres" class="gres hide" role="listbox" aria-label="Resultados"></div></div>
+  <button class="b pri hide-m" id="btnNuevoPac2">+ Nuevo paciente</button>
+</div>
 <div class="banner hide" id="banner"></div>
 
+<!-- INICIO -->
+<section id="vInicio" class="g">
+  <div class="hero"><div><p class="muted" id="hoyFecha" style="margin:0 0 4px"></p><h1 id="saludo">Hola</h1></div></div>
+  <div class="kpis" id="kpis"></div>
+  <div class="cols2">
+    <div class="card"><div class="row"><h2>Agenda de hoy</h2><button class="linkb sp" data-go="vAgenda">Abrir agenda</button></div><div id="inCitas"></div></div>
+    <div class="card"><div class="row"><h2>Controles de hoy y próximos 7 días</h2><button class="linkb sp" data-go="vControles">Ver todos</button></div><div class="feed" id="inCtrl"></div></div>
+  </div>
+  <div class="cols2">
+    <div class="card"><div class="row"><h2>Últimas atenciones</h2><button class="linkb sp" data-go="vActividad">Ver todas</button></div><div class="feed" id="inFeed"></div></div>
+    <div class="card hide" id="inLowCard"><div class="row"><h2>Stock bajo</h2><button class="linkb sp" data-go="vInventario">Ver inventario</button></div><div class="feed" id="inLow"></div></div>
+  </div>
+</section>
+
+<!-- TUTORES -->
+<section id="vTutores" class="g hide">
+  <div class="row"><h1>Tutores</h1><span class="pill" id="countTut"></span></div>
+  <label class="f">Buscar tutor<input id="tq" type="search" placeholder="Nombre, RUT, teléfono o correo" autocomplete="off"></label>
+  <div class="card" style="padding:6px 14px"><div class="feed" id="tutList"></div></div>
+</section>
+
+
 <!-- PACIENTES -->
-<section id="vLista" class="g">
+<section id="vLista" class="g hide">
   <div class="row"><h1>Pacientes</h1><span class="pill" id="countPac"></span><button class="b pri sp hide-m" id="btnNuevoPac">+ Nuevo paciente</button></div>
   <div class="filters">
     <label class="f">Buscar<input id="q" type="search" placeholder="Nombre, tutor, RUT, teléfono, N° de ficha o microchip" autocomplete="off"></label>
@@ -240,6 +367,16 @@ body.auth .authw{display:grid}
 <section id="vEquipo" class="g hide">
   <div class="row"><h1>Equipo clínico</h1><button class="b sp" id="btnPerfil2">Editar mi perfil</button></div>
   <div class="card" style="padding:6px 14px"><div class="feed" id="teamList"></div></div>
+  <form class="card g hide" id="cfgCard" novalidate><h2>Datos de la clínica</h2>
+    <p class="muted" style="margin:0">Aparecen en recetas, cotizaciones e impresiones, y definen el horario de la agenda y los mensajes de WhatsApp. Solo administradores.</p>
+    <div class="g g3"><label class="f">Nombre<input data-k="nombre"></label><label class="f">RUT<input data-k="rut"></label><label class="f">Teléfono / WhatsApp<input data-k="telefono" type="tel"></label></div>
+    <div class="g g2"><label class="f">Dirección<input data-k="direccion"></label><label class="f">Correo<input data-k="email" type="email"></label></div>
+    <div class="g g4"><label class="f">IVA (%)<input data-k="iva" type="number" min="0" max="50" step="any"></label><label class="f">Agenda desde<input data-k="horaInicio" type="time"></label><label class="f">Agenda hasta<input data-k="horaFin" type="time"></label><label class="f">Duración de cita (min)<input data-k="duracion" type="number" min="5" step="5"></label></div>
+    <label class="f">Mensaje de WhatsApp para confirmar citas<textarea data-k="msgCita" style="min-height:80px"></textarea></label>
+    <label class="f">Mensaje de WhatsApp para avisar controles<textarea data-k="msgControl" style="min-height:70px"></textarea></label>
+    <p class="muted small" style="margin:0">Puedes usar: {tutor} {mascota} {clinica} {fecha} {hora}</p>
+    <div class="row"><button class="b pri" type="submit">Guardar datos de la clínica</button></div>
+  </form>
   <div class="card g hide" id="respCard"><h2>Respaldo de datos</h2>
     <p class="muted" style="margin:0">Descarga una copia de todas las fichas. Hazlo una vez por semana y guárdala en tu Drive u OneDrive. Solo los administradores ven esta sección.</p>
     <p class="pill" id="respUltimo" style="white-space:normal;justify-self:start;margin:0"></p>
@@ -269,13 +406,148 @@ body.auth .authw{display:grid}
 <section id="vPaciente" class="g hide">
   <div class="row"><button class="b sm" data-back>← Pacientes</button></div>
   <div class="card g" id="pacHead"></div>
-  <div class="tabs" role="tablist"><button class="tab on" data-ptab="hist" id="tabHist">Historial</button><button class="tab" data-ptab="datos">Datos del paciente</button><button class="tab" data-ptab="reg">Dueños y cambios</button></div>
+  <div class="tabs" role="tablist"><button class="tab on" data-ptab="hist" id="tabHist">Historial</button><button class="tab" data-ptab="rec" id="tabRec">Recetas</button><button class="tab" data-ptab="cit" id="tabCit">Citas</button><button class="tab" data-ptab="datos">Datos del paciente</button><button class="tab" data-ptab="reg">Dueños y cambios</button></div>
   <div id="pHist" class="g">
     <div class="row"><button class="b pri" id="btnNuevaCon">+ Nueva consulta</button></div>
     <div id="histList"></div>
   </div>
   <div id="pDatos" class="card g hide"></div>
   <div id="pReg" class="g hide"></div>
+  <div id="pRec" class="g hide"></div>
+  <div id="pCit" class="g hide"></div>
+</section>
+
+
+<!-- AGENDA -->
+<section id="vAgenda" class="g hide">
+  <div class="row"><h1>Agenda</h1><button class="b pri sp" id="btnNuevaCita">+ Nueva cita</button></div>
+  <div class="agbar card" style="padding:10px 12px">
+    <button class="b sm" id="agPrev" aria-label="Anterior">‹</button><button class="b sm" id="agHoy">Hoy</button><button class="b sm" id="agNext" aria-label="Siguiente">›</button>
+    <h2 id="agTitulo" style="margin:0 8px"></h2>
+    <input type="date" id="agFecha" style="width:auto" aria-label="Ir a fecha">
+    <div class="seg sp" role="group" aria-label="Vista" style="min-width:180px"><button type="button" data-agv="dia" class="on">Día</button><button type="button" data-agv="semana">Semana</button></div>
+    <select id="agMed" style="width:auto;min-width:180px" aria-label="Filtrar por médico"><option value="">Todo el equipo</option></select>
+  </div>
+  <p class="muted small" id="agResumen" style="margin:0"></p>
+  <div id="agBody"></div>
+</section>
+
+<!-- COTIZACIONES -->
+<section id="vCotizaciones" class="g hide">
+  <div class="row"><h1>Cotizaciones</h1><button class="b pri sp" id="btnNuevaCot">+ Nueva cotización</button></div>
+  <div class="card" style="padding:0"><div class="scroll"><table class="tbl" style="min-width:720px"><thead><tr><th style="padding:10px 12px">N°</th><th style="padding:10px 12px">Fecha</th><th style="padding:10px 12px">Paciente / cliente</th><th style="padding:10px 12px">Estado</th><th style="padding:10px 12px;text-align:right">Total</th><th style="padding:10px 12px">Creada por</th></tr></thead><tbody id="cotBody"></tbody></table></div>
+  <div class="empty hide" id="cotEmpty">Aún no hay cotizaciones. Crea la primera con “+ Nueva cotización”. Los precios salen del catálogo de Inventario.</div></div>
+</section>
+
+<!-- INVENTARIO -->
+<section id="vInventario" class="g hide">
+  <div class="row"><h1>Inventario y precios</h1><span class="pill bad hide" id="invLowPill"></span><button class="b pri sp" id="btnNuevoProd">+ Nuevo producto o servicio</button></div>
+  <div class="filters" style="grid-template-columns:minmax(0,2fr) minmax(0,1fr)">
+    <label class="f">Buscar<input id="iq" type="search" placeholder="Nombre del insumo, medicamento o servicio" autocomplete="off"></label>
+    <label class="f">Mostrar<select id="iTipo"><option value="">Todo</option><option value="insumo">Insumos</option><option value="medicamento">Medicamentos</option><option value="servicio">Servicios</option><option value="procedimiento">Procedimientos</option><option value="bajo">Solo stock bajo</option><option value="inactivo">Desactivados</option></select></label>
+  </div>
+  <div class="card" style="padding:0"><div class="scroll"><table class="tbl" style="min-width:860px"><thead><tr><th style="padding:10px 12px">Nombre</th><th style="padding:10px 12px">Tipo</th><th style="padding:10px 12px;text-align:right">Stock</th><th style="padding:10px 12px;text-align:right">Mínimo</th><th style="padding:10px 12px;text-align:right">Precio neto</th><th style="padding:10px 12px;text-align:right">Con IVA</th><th style="padding:10px 12px">Movimiento</th></tr></thead><tbody id="invBody"></tbody></table></div>
+  <div class="empty hide" id="invEmpty">Aún no hay productos. Agrega insumos, medicamentos, servicios (consulta, vacuna) y procedimientos (cirugías) con su precio: se usan en el cotizador.</div></div>
+</section>
+
+<!-- FORM CITA -->
+<section id="vFormCita" class="hide">
+<form id="fCita" class="card g" novalidate>
+  <div class="row"><h1 id="fCitaTitle">Nueva cita</h1></div>
+  <div class="g">
+      <div id="citaSel" class="selpac hide"></div>
+      <div id="citaPick"><label class="f">Paciente<input id="citaQ" list="dlPac" placeholder="Escribe el nombre de la mascota o del tutor y elige de la lista" autocomplete="off"></label></div>
+    </div>
+  <fieldset id="citaNuevoFs" class="hide"><legend>Paciente nuevo</legend>
+    <p class="muted small" style="margin:0">Se creará la ficha con estos datos básicos; la completas el día de la atención.</p>
+    <div class="g g2"><label class="f">Nombre de la mascota *<input id="cnNombre"></label><label class="f">Especie<select id="cnEspecie"><option>Canino</option><option>Felino</option><option>Otro</option></select></label></div>
+    <div class="g g2"><label class="f">Nombre del tutor<input id="cnTutor"></label><label class="f">Teléfono del tutor (WhatsApp)<input id="cnTel" type="tel" placeholder="+569"></label></div>
+  </fieldset>
+  <div class="row" id="citaNuevoRow"><button type="button" class="linkb" id="btnCitaNuevo">¿Es un paciente nuevo? Regístralo aquí</button></div>
+  <div class="g g4">
+    <label class="f">Fecha *<input type="date" data-k="fecha" required></label>
+    <label class="f">Hora *<input type="time" data-k="hora" step="300" required></label>
+    <label class="f">Duración<select data-k="duracion"><option value="15">15 min</option><option value="30">30 min</option><option value="45">45 min</option><option value="60">1 hora</option><option value="90">1 h 30</option><option value="120">2 horas</option><option value="180">3 horas</option></select></label>
+    <label class="f">Médico<select data-k="medicoId" id="citaMed"></select></label>
+  </div>
+  <div class="g g2">
+    <label class="f">Motivo<input data-k="motivo" placeholder="Ej: control, vacuna, consulta por vómitos"></label>
+    <label class="f" id="citaEstadoL">Estado<select data-k="estado"><option value="agendada">Agendada</option><option value="confirmada">Confirmada</option><option value="atendida">Atendida</option><option value="no_asistio">No asistió</option><option value="cancelada">Cancelada</option></select></label>
+  </div>
+  <label class="f">Notas internas<textarea data-k="notas" style="min-height:70px"></textarea></label>
+  <p class="msg hide bad" id="citaAviso"></p>
+  <div class="actions"><button type="button" class="b" data-cancel-to="vAgenda">Cancelar</button><button type="button" class="b danger hide" id="btnDelCita">Eliminar</button><button class="b pri sp" type="submit">Guardar cita</button></div>
+</form>
+</section>
+
+<!-- FORM PRODUCTO -->
+<section id="vFormProd" class="hide">
+<form id="fProd" class="card g" novalidate>
+  <h1 id="fProdTitle">Nuevo producto o servicio</h1>
+  <div class="g g3">
+    <label class="f">Nombre *<input data-k="nombre" required placeholder="Ej: Jeringa 3 ml, Vacuna óctuple, Consulta general"></label>
+    <label class="f">Tipo<select data-k="tipo" id="prodTipo"><option value="insumo">Insumo</option><option value="medicamento">Medicamento</option><option value="servicio">Servicio</option><option value="procedimiento">Procedimiento / cirugía</option></select></label>
+    <label class="f">Unidad<input data-k="unidad" placeholder="unidad, caja, ml, frasco…"></label>
+  </div>
+  <label class="chk"><input type="checkbox" id="prodStock">Controlar stock de este producto</label>
+  <div class="g g3" id="prodStockRow">
+    <label class="f" id="prodStockIniL">Stock inicial<input type="number" step="any" min="0" id="prodStockIni" inputmode="decimal"></label>
+    <label class="f">Stock mínimo (alerta)<input type="number" step="any" min="0" data-k="stock_minimo" inputmode="decimal"></label>
+  </div>
+  <div class="g g3">
+    <label class="f">Costo de compra (neto)<input type="number" step="1" min="0" data-k="costo" inputmode="numeric"></label>
+    <label class="f">Precio de venta NETO *<input type="number" step="1" min="0" data-k="precio" id="prodPrecio" inputmode="numeric"></label>
+    <div class="ynq">Precio con IVA<b id="prodConIva" style="font-size:20px;color:var(--ink);padding-top:8px">—</b></div>
+  </div>
+  <label class="chk"><input type="checkbox" id="prodActivo" checked>Activo (aparece en el cotizador y en las recetas)</label>
+  <div id="prodMovs" class="hide"><h2 style="margin:8px 0">Últimos movimientos</h2><div class="feed" id="prodMovList"></div></div>
+  <div class="actions"><button type="button" class="b" data-cancel-to="vInventario">Cancelar</button><button type="button" class="b danger hide" id="btnDelProd">Eliminar</button><button class="b pri sp" type="submit">Guardar</button></div>
+</form>
+</section>
+
+<!-- FORM COTIZACIÓN -->
+<section id="vFormCot" class="hide">
+<form id="fCot" class="card g" novalidate>
+  <div class="row"><h1 id="fCotTitle">Nueva cotización</h1><span class="pill sp" id="fCotNum"></span></div>
+  <div class="g">
+      <div id="cotSel" class="selpac hide"></div>
+      <div id="cotPick"><label class="f">Paciente<input id="cotQ" list="dlPac" placeholder="Escribe el nombre de la mascota o del tutor y elige de la lista" autocomplete="off"></label></div>
+    </div>
+  <div class="g g3">
+    <label class="f">Cliente (si no es paciente registrado)<input data-k="clienteNombre" placeholder="Nombre del tutor"></label>
+    <label class="f">Teléfono del cliente<input data-k="clienteTel" type="tel" placeholder="+569"></label>
+    <label class="f">Fecha<input type="date" data-k="fecha"></label>
+  </div>
+  <div class="g g3">
+    <label class="f">Válida por (días)<input type="number" min="1" data-k="validez" inputmode="numeric"></label>
+    <label class="f">Estado<select data-k="estado"><option value="borrador">Borrador</option><option value="enviada">Enviada</option><option value="aceptada">Aceptada</option><option value="rechazada">Rechazada</option></select></label>
+    <label class="f">Descuento (%)<input type="number" min="0" max="100" step="any" id="cotDesc" inputmode="decimal"></label>
+  </div>
+  <div><h2 style="margin:6px 0">Detalle</h2>
+    <div class="scroll"><table class="items"><thead><tr><th style="width:44%">Descripción (elige del catálogo o escribe)</th><th style="width:12%">Cantidad</th><th style="width:18%">Precio unit. neto</th><th style="width:18%;text-align:right">Subtotal</th><th></th></tr></thead><tbody id="cotItems"></tbody></table></div>
+    <button type="button" class="b sm" id="btnAddItem" style="margin-top:8px">+ Agregar ítem</button>
+  </div>
+  <div class="totales" id="cotTot"></div>
+  <label class="f">Notas para el cliente<textarea data-k="notas" style="min-height:70px" placeholder="Ej: incluye exámenes preoperatorios y hospitalización de 1 día"></textarea></label>
+  <div class="actions"><button type="button" class="b" data-cancel-to="vCotizaciones">Cancelar</button><button type="button" class="b hide" id="btnCotPrint">Imprimir / PDF</button><button type="button" class="b wa hide" id="btnCotWa">WhatsApp</button><button type="button" class="b danger hide" id="btnDelCot">Eliminar</button><button class="b pri sp" type="submit">Guardar</button></div>
+</form>
+</section>
+
+<!-- FORM RECETA -->
+<section id="vFormReceta" class="hide">
+<form id="fRec" class="card g" novalidate>
+  <div class="row"><h1 id="fRecTitle">Nueva receta</h1><span class="pill sp" id="fRecPac"></span></div>
+  <div class="g g3">
+    <label class="f">Fecha<input type="date" data-k="fecha"></label>
+    <label class="f">Médico que prescribe<select data-k="medicoId" id="recMed"></select></label>
+  </div>
+  <div><h2 style="margin:6px 0">Medicamentos</h2>
+    <div class="scroll"><table class="items" style="min-width:860px"><thead><tr><th style="width:24%">Medicamento</th><th style="width:14%">Presentación</th><th style="width:13%">Dosis</th><th style="width:10%">Vía</th><th style="width:14%">Frecuencia</th><th style="width:13%">Duración</th><th></th></tr></thead><tbody id="recItems"></tbody></table></div>
+    <button type="button" class="b sm" id="btnAddMed" style="margin-top:8px">+ Agregar medicamento</button>
+  </div>
+  <label class="f">Indicaciones generales<textarea data-k="indicaciones" style="min-height:90px"></textarea></label>
+  <div class="actions"><button type="button" class="b" data-cancel-to="vPaciente">Cancelar</button><button type="button" class="b hide" id="btnRecPrint">Imprimir / PDF</button><button class="b pri sp" type="submit">Guardar receta</button></div>
+</form>
 </section>
 
 <!-- FORM PACIENTE -->
@@ -403,6 +675,16 @@ body.auth .authw{display:grid}
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+<datalist id="dlPac"></datalist><datalist id="dlProd"></datalist><datalist id="dlMed"></datalist>
+<div class="sheet" id="moreSheet"><div role="menu" aria-label="Más secciones" id="moreList"></div></div>
+<div class="modal" id="movModal" role="dialog" aria-modal="true" aria-labelledby="movTitle">
+  <form class="card g" id="fMov" novalidate><h2 id="movTitle">Movimiento de stock</h2><p class="muted" id="movProd" style="margin:0"></p>
+    <div class="g g2"><label class="f">Tipo<select id="movTipo"><option value="entrada">Entrada (compra, reposición)</option><option value="salida">Salida (uso, venta, merma)</option><option value="ajuste">Ajuste de inventario (+/−)</option></select></label><label class="f">Cantidad<input id="movCant" type="number" step="any" inputmode="decimal"></label></div>
+    <label class="f">Motivo<input id="movMotivo" placeholder="Ej: compra a proveedor, usado en cirugía de Tayson"></label>
+    <p class="msg hide bad" id="movMsg"></p>
+    <div class="row"><button type="button" class="b" id="movNo">Cancelar</button><button class="b pri sp" type="submit">Registrar</button></div></form>
+</div>
+<div id="printArea"></div>
 <script src="config.js"></script>
 <script src="vendor/supabase.js"></script>
 <script src="app.js"></script>

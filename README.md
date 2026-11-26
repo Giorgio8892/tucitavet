@@ -16,6 +16,7 @@ App web (computador y celular) para registrar pacientes, consultas e historial c
 | `vendor/xlsx.full.min.js` | Librería SheetJS (v0.18.5) para generar el respaldo en Excel |
 | `privacidad.html` | Política de privacidad y condiciones de uso (enlazada en Google) |
 | `supabase/schema.sql` | Crea las tablas y las reglas de seguridad en Supabase |
+| `supabase/02_modulos.sql` | Agrega agenda, recetas, inventario, cotizaciones y datos de la clínica |
 
 ---
 
@@ -120,6 +121,20 @@ Como solo pide nombre y correo, el inicio con Google no necesita la verificació
 1. En la app: **Equipo → Copiar dirección de la app** y envíala por WhatsApp.
 2. Cada persona crea su cuenta (correo o Google). Queda **Esperando aprobación**.
 3. Tú (admin) vas a **Equipo → Aprobar**. Puedes nombrar a otros administradores o quitar el acceso a quien se vaya (lo que registró se mantiene firmado con su nombre).
+
+## Paso 10 · Activar agenda, recetas, inventario y cotizador
+
+1. Supabase → **Editor SQL** → **Nueva consulta**.
+2. Pega **todo** `supabase/02_modulos.sql` → **Ejecutar**. Debe decir *Éxito*. (Se puede volver a ejecutar sin problema.)
+3. En la app, como administrador: **Equipo → Datos de la clínica**. Completa RUT, dirección, teléfono, horario de la agenda, IVA y los mensajes de WhatsApp → **Guardar**.
+4. **Inventario → + Nuevo producto o servicio**: carga tus servicios (consulta, vacunas), procedimientos (cirugías) e insumos con su **precio neto**. Son los que aparecen en el cotizador.
+
+### Cómo funciona cada módulo
+- **Agenda:** vista Día o Semana. Toca un horario libre para agendar. Cada cita tiene botones: **WhatsApp** (abre WhatsApp con el recordatorio escrito), **Confirmó**, **Atender** (abre la ficha y una consulta nueva), **No asistió**, **Cancelar**. Si el médico ya tiene otra cita a esa hora, la app avisa.
+- **WhatsApp:** gratis, usa el WhatsApp del celular o computador de la clínica; la persona solo presiona *Enviar*. El envío 100% automático requiere la API de WhatsApp Business (Meta), que tiene costo por conversación.
+- **Recetas:** desde una consulta (**Receta**) o desde la pestaña **Recetas** del paciente. Se imprimen con el nombre y registro del médico y línea de firma.
+- **Inventario:** **+ Entrada** al comprar, **− Salida** al usar o vender. El stock se actualiza solo y queda registrado quién lo movió. Avisa en Inicio cuando algo baja del mínimo.
+- **Cotizador:** elige ítems del catálogo (o escribe uno libre), cantidad y descuento; calcula neto, IVA y total. Se imprime o se envía por WhatsApp.
 
 ---
 
