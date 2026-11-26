@@ -198,6 +198,67 @@ legend{font:700 16px Figtree,sans-serif;padding:0 6px}
   .week{grid-template-columns:minmax(0,1fr)}
   .wday{min-height:0}
 }
+
+/* ---- Diseño renovado ---- */
+:root{--sh1:0 1px 2px rgba(18,57,47,.07),0 10px 28px rgba(18,57,47,.09);--sh2:0 1px 2px rgba(18,57,47,.08),0 16px 36px rgba(18,57,47,.12);--mint:#8FE3C6;--wa:#25A15A}
+.card{border-color:transparent;box-shadow:var(--sh1);border-radius:18px}
+.kpi{border:0;border-top:4px solid var(--acc);box-shadow:var(--sh2);border-radius:18px}
+.kpi b{color:var(--acc)}.kpi.warn{border-top-color:#C77A2E}.kpi.warn b{color:light-dark(#9A4A00,#F7C58A)}
+.kpi.hl{background:var(--card);color:var(--ink);border-color:transparent;border-top:4px solid var(--acc)}.kpi.hl span{color:var(--mute);opacity:1}
+button.pri{box-shadow:0 6px 16px rgba(29,92,77,.28)}
+button.pri:hover{filter:brightness(1.08)}
+.nav.on{background:linear-gradient(90deg,light-dark(#D9EFE6,#1C3832),transparent);box-shadow:inset 3px 0 0 var(--acc)}
+.topm{background:linear-gradient(135deg,#12392F,#1D5C4D);color:#fff;border-bottom:0}
+.topm .mark{color:var(--mint)!important}
+.welcome{position:relative;overflow:hidden;border-radius:26px;padding:clamp(22px,3.5vw,34px) clamp(20px,3.5vw,34px) 86px;color:#fff;
+  background:radial-gradient(circle at 84% 16%,rgba(143,227,198,.38),rgba(143,227,198,0) 42%),radial-gradient(circle at 8% 115%,rgba(242,166,90,.24),rgba(242,166,90,0) 42%),linear-gradient(135deg,#12392F,#1D5C4D)}
+.welcome h1{font-size:clamp(30px,5vw,46px);color:#fff;letter-spacing:-.02em}
+.welcome .wdate{color:#A9E7D0;font-weight:600;margin:0 0 6px}
+.welcome .wsub{color:#D6EEE5;font-size:17px;margin:8px 0 0;max-width:56ch}
+.welcome .wlogo{position:absolute;right:clamp(-40px,2vw,30px);top:-10px;width:clamp(180px,26vw,300px);height:clamp(180px,26vw,300px);color:var(--mint);opacity:.3;animation:reveal 1.8s cubic-bezier(.2,.7,.2,1) both;pointer-events:none}
+@keyframes reveal{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+.glass{position:relative;margin-top:20px;display:inline-flex;flex-wrap:wrap;gap:12px 16px;align-items:center;padding:14px 16px;border-radius:18px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.22);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);max-width:100%}
+.glass small{display:block;color:#A9E7D0;font-weight:600;font-size:12px}.glass b{font-size:18px}.glass span{color:#D6EEE5;font-size:13px}
+.glass button{border:0;min-height:42px}.glass .wbtn{background:var(--wa);color:#fff}.glass .abtn{background:#fff;color:#12392F}
+.kpis.lift{margin-top:-64px;padding:0 clamp(8px,1.6vw,18px);position:relative}
+.occ{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;gap:10px;align-items:center;font-size:13px}
+.occ .bar{height:12px;border-radius:6px;background:light-dark(#E7EEEA,#26332E);overflow:hidden}.occ .bar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,var(--acc),var(--mint))}
+.occ .bar i.full{background:linear-gradient(90deg,#C77A2E,#F2A65A)}
+.occ b{text-align:right;font-variant-numeric:tabular-nums}
+/* agenda mensual */
+.month{border-radius:18px;overflow:hidden;background:var(--card);box-shadow:var(--sh1)}
+.month .wd,.month .gr{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
+.month .wd div{padding:10px 8px;font-size:13px;font-weight:700;color:var(--mute);background:light-dark(#F6FAF8,#18221E)}
+.mday{font:inherit;text-align:left;border:0;border-right:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--card);padding:6px;min-height:112px;display:flex;flex-direction:column;gap:3px;cursor:pointer;color:var(--ink)}
+.mday.out{color:var(--mute);opacity:.55}.mday.sel{outline:2px solid var(--acc);outline-offset:-2px}
+.mday .dn{display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:14px}
+.mday .dn i{font-style:normal;font-size:11px;color:var(--mute)}
+.mday.today .dn span{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--acc);color:var(--acc-ink);box-shadow:0 0 0 4px rgba(143,227,198,.55)}
+.mc{display:block;font-size:12px;line-height:1.25;padding:2px 6px;border-radius:6px;background:var(--soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mc.confirmada{background:#DCF0E3;color:#1F5E38}.mc.agendada{background:var(--card);border:1px solid #B9D8CC}.mc.atendida{opacity:.6}.mc.cancelada,.mc.no_asistio{background:var(--warn-bg);color:var(--warn);text-decoration:line-through}
+.mdots{display:none;gap:2px;justify-content:center}.mdots i{width:5px;height:5px;border-radius:50%;background:var(--acc)}
+.mlay{display:grid;grid-template-columns:minmax(0,3fr) minmax(280px,1fr);gap:16px;align-items:start}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;color:var(--mute)}.legend span{display:inline-flex;gap:6px;align-items:center}.legend i{width:12px;height:12px;border-radius:4px;display:inline-block}
+/* combobox */
+.combo{position:fixed;z-index:30;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 18px 40px rgba(18,57,47,.2);padding:6px;max-height:320px;overflow:auto;display:none}
+.combo.on{display:block}
+.combo button{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0 12px;width:100%;text-align:left;border:0;background:none;border-radius:10px;padding:8px 10px;font:inherit;color:var(--ink);cursor:pointer}
+.combo button.on,.combo button:hover{background:var(--soft);box-shadow:inset 3px 0 0 var(--acc)}
+.combo small{color:var(--mute);font-size:12px}.combo small.low{color:var(--warn)}
+.combo mark{background:none;color:inherit;font-weight:800;text-decoration:underline;text-decoration-color:var(--mint);text-decoration-thickness:3px}
+/* importador */
+.drop{display:flex;align-items:center;gap:14px;padding:18px;border:2px dashed #9CCFB9;border-radius:16px;background:linear-gradient(180deg,light-dark(#F3FAF6,#16231E),var(--card));cursor:pointer}
+.drop.over{border-color:var(--acc);background:var(--soft)}
+.xls{width:48px;height:48px;border-radius:12px;background:#1F7A47;color:#fff;display:grid;place-items:center;font-weight:800;flex:none}
+.steps{display:flex;flex-wrap:wrap;gap:10px}.steps>div{display:flex;align-items:center;gap:10px;flex:1 1 160px;font-weight:700}
+.steps b{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--line);color:var(--mute)}
+.steps .done b,.steps .now b{background:var(--acc);color:var(--acc-ink)}.steps .now b{box-shadow:0 0 0 5px rgba(143,227,198,.55)}
+.drop>.b{border:1px solid var(--line);border-radius:10px;min-height:38px;padding:0 12px;font-weight:600;background:var(--card)}
+#impSum .b{white-space:normal;min-height:44px}
+.mapr{display:grid;grid-template-columns:minmax(0,1fr) 24px minmax(0,1fr);gap:8px;align-items:center}
+.mapr span{background:light-dark(#F3F7F5,#18221E);border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:899px){.side .nav.on{background:var(--soft);box-shadow:none}.legend .sp{display:none}.mlay{grid-template-columns:minmax(0,1fr)}.mday{min-height:52px;align-items:center;padding:4px 2px}.mday .mc,.mday .more,.mday .dn i{display:none}.mday .dn{justify-content:center}.mdots{display:flex}.month .wd div{text-align:center;padding:8px 2px}}
+@media(prefers-reduced-motion:reduce){.welcome .wlogo{animation:none}}
 .hide{display:none!important}
 @media(max-width:899px){.filters{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.filters>label:first-child{grid-column:1/-1}}
 @media(max-width:899px){
@@ -312,15 +373,22 @@ body.auth .authw{display:grid}
 
 <!-- INICIO -->
 <section id="vInicio" class="g">
-  <div class="hero"><div><p class="muted" id="hoyFecha" style="margin:0 0 4px"></p><h1 id="saludo">Hola</h1></div></div>
-  <div class="kpis" id="kpis"></div>
+  <div class="welcome">
+    <span class="mark wlogo" aria-hidden="true"></span>
+    <div style="position:relative"><p class="wdate" id="hoyFecha"></p><h1 id="saludo">Hola</h1><p class="wsub" id="wsub"></p></div>
+    <div class="glass hide" id="nextCita"></div>
+  </div>
+  <div class="kpis lift" id="kpis"></div>
   <div class="cols2">
     <div class="card"><div class="row"><h2>Agenda de hoy</h2><button class="linkb sp" data-go="vAgenda">Abrir agenda</button></div><div id="inCitas"></div></div>
     <div class="card"><div class="row"><h2>Controles de hoy y próximos 7 días</h2><button class="linkb sp" data-go="vControles">Ver todos</button></div><div class="feed" id="inCtrl"></div></div>
   </div>
   <div class="cols2">
     <div class="card"><div class="row"><h2>Últimas atenciones</h2><button class="linkb sp" data-go="vActividad">Ver todas</button></div><div class="feed" id="inFeed"></div></div>
+    <div class="g" style="align-content:start">
+    <div class="card"><h2 style="margin:0 0 2px">Ocupación de la semana</h2><p class="muted small" style="margin:0 0 12px">Tiempo agendado sobre el horario de atención</p><div class="g" id="inOcc" style="gap:10px"></div></div>
     <div class="card hide" id="inLowCard"><div class="row"><h2>Stock bajo</h2><button class="linkb sp" data-go="vInventario">Ver inventario</button></div><div class="feed" id="inLow"></div></div>
+    </div>
   </div>
 </section>
 
@@ -425,7 +493,7 @@ body.auth .authw{display:grid}
     <button class="b sm" id="agPrev" aria-label="Anterior">‹</button><button class="b sm" id="agHoy">Hoy</button><button class="b sm" id="agNext" aria-label="Siguiente">›</button>
     <h2 id="agTitulo" style="margin:0 8px"></h2>
     <input type="date" id="agFecha" style="width:auto" aria-label="Ir a fecha">
-    <div class="seg sp" role="group" aria-label="Vista" style="min-width:180px"><button type="button" data-agv="dia" class="on">Día</button><button type="button" data-agv="semana">Semana</button></div>
+    <div class="seg sp" role="group" aria-label="Vista" style="min-width:240px"><button type="button" data-agv="dia" class="on">Día</button><button type="button" data-agv="semana">Semana</button><button type="button" data-agv="mes">Mes</button></div>
     <select id="agMed" style="width:auto;min-width:180px" aria-label="Filtrar por médico"><option value="">Todo el equipo</option></select>
   </div>
   <p class="muted small" id="agResumen" style="margin:0"></p>
@@ -441,13 +509,30 @@ body.auth .authw{display:grid}
 
 <!-- INVENTARIO -->
 <section id="vInventario" class="g hide">
-  <div class="row"><h1>Inventario y precios</h1><span class="pill bad hide" id="invLowPill"></span><button class="b pri sp" id="btnNuevoProd">+ Nuevo producto o servicio</button></div>
+  <div class="row"><h1>Inventario y precios</h1><span class="pill bad hide" id="invLowPill"></span><button class="b sp" id="btnImport">Importar desde Excel</button><button class="b pri" id="btnNuevoProd">+ Nuevo producto o servicio</button></div>
   <div class="filters" style="grid-template-columns:minmax(0,2fr) minmax(0,1fr)">
     <label class="f">Buscar<input id="iq" type="search" placeholder="Nombre del insumo, medicamento o servicio" autocomplete="off"></label>
     <label class="f">Mostrar<select id="iTipo"><option value="">Todo</option><option value="insumo">Insumos</option><option value="medicamento">Medicamentos</option><option value="servicio">Servicios</option><option value="procedimiento">Procedimientos</option><option value="bajo">Solo stock bajo</option><option value="inactivo">Desactivados</option></select></label>
   </div>
   <div class="card" style="padding:0"><div class="scroll"><table class="tbl" style="min-width:860px"><thead><tr><th style="padding:10px 12px">Nombre</th><th style="padding:10px 12px">Tipo</th><th style="padding:10px 12px;text-align:right">Stock</th><th style="padding:10px 12px;text-align:right">Mínimo</th><th style="padding:10px 12px;text-align:right">Precio neto</th><th style="padding:10px 12px;text-align:right">Con IVA</th><th style="padding:10px 12px">Movimiento</th></tr></thead><tbody id="invBody"></tbody></table></div>
   <div class="empty hide" id="invEmpty">Aún no hay productos. Agrega insumos, medicamentos, servicios (consulta, vacuna) y procedimientos (cirugías) con su precio: se usan en el cotizador.</div></div>
+</section>
+
+
+<!-- IMPORTAR EXCEL -->
+<section id="vImport" class="g hide">
+  <div class="row"><div><button class="linkb" data-go="vInventario" style="padding:0">‹ Inventario</button><h1>Importar inventario desde Excel</h1></div><button class="b sp" id="btnPlantilla">Descargar plantilla de ejemplo (.xlsx)</button></div>
+  <div class="card"><div class="steps" id="impSteps"><div class="now"><b>1</b>Subir archivo</div><div><b>2</b>Revisar columnas</div><div><b>3</b>Importar</div></div></div>
+  <div class="mlay">
+    <div class="g" style="align-content:start">
+      <div class="card g">
+        <label class="drop" id="impDrop"><span class="xls">XLS</span><span style="flex:1"><b id="impFile">Elige tu archivo .xlsx o .csv</b><br><span class="muted small" id="impFileSub">O arrástralo aquí. La primera fila debe tener los nombres de las columnas.</span></span><span class="b sm" style="display:inline-grid;place-items:center">Elegir archivo</span><input type="file" id="impInput" accept=".xlsx,.xls,.csv" class="hide"></label>
+        <div id="impMapBox" class="g hide"><h2 style="margin:4px 0 0">Une tus columnas con los campos de la app</h2><p class="muted" style="margin:0">Las reconocimos solas; corrige si alguna no corresponde. Si un producto ya existe con el mismo nombre, se actualizan su stock y precio.</p><div class="g" id="impMap" style="gap:8px"></div></div>
+      </div>
+      <div class="card hide" id="impPrevBox"><div class="row"><h2 style="margin:0">Vista previa</h2><span class="muted small sp" id="impPrevInfo"></span></div><div class="scroll" style="margin-top:8px"><table class="tbl" style="min-width:640px"><thead><tr><th style="padding:10px 12px">Nombre</th><th style="padding:10px 12px">Tipo</th><th style="padding:10px 12px;text-align:right">Stock</th><th style="padding:10px 12px;text-align:right">Mínimo</th><th style="padding:10px 12px;text-align:right">Precio neto</th><th style="padding:10px 12px">Resultado</th></tr></thead><tbody id="impPrev"></tbody></table></div></div>
+    </div>
+    <div class="card g hide" id="impSum" style="align-content:start"></div>
+  </div>
 </section>
 
 <!-- FORM CITA -->
@@ -684,6 +769,7 @@ body.auth .authw{display:grid}
     <p class="msg hide bad" id="movMsg"></p>
     <div class="row"><button type="button" class="b" id="movNo">Cancelar</button><button class="b pri sp" type="submit">Registrar</button></div></form>
 </div>
+<div class="combo" id="combo" role="listbox" aria-label="Sugerencias"></div>
 <div id="printArea"></div>
 <script src="config.js"></script>
 <script src="vendor/supabase.js"></script>
