@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TuCita Vet · Fichas clínicas</title>
+<link rel="icon" href="logo.png">
+<meta name="theme-color" content="#1D5C4D">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: clínico, cálido, rápido de usar en mesón, box o celular
+   IDEA: la carpeta de fichas de la clínica, firmada a mano como el logo de línea del perro y el gato
+   PICTURE: el logo en trazo fino abre la app; la tabla de pacientes y la línea de tiempo de cada ficha son la imagen
+   COLOUR and TYPE: verde pino sobre niebla verdosa, blanco, damasco para controles, rojo solo para alertas; Figtree en una sola familia
+   LAYOUT: menú lateral en computador, barra inferior en celular; una columna de trabajo */
+:root{color-scheme:light dark;--bg:light-dark(#EDF2EF,#0E1513);--card:light-dark(#FFFFFF,#16201C);--ink:light-dark(#1C2A26,#E4ECE8);--mute:light-dark(#53625D,#9FB0A9);--line:light-dark(#D6E0DB,#26332E);--acc:light-dark(#1D5C4D,#7FD0B8);--acc-ink:light-dark(#FFFFFF,#0B1714);--soft:light-dark(#DCEBE3,#1D3530);--warn:light-dark(#9B2318,#FF9F8A);--warn-bg:light-dark(#FBE1DC,#3A1E18);--amber:light-dark(#7A4300,#F7C58A);--amber-bg:light-dark(#FCE7CF,#3A2A16);--field:light-dark(#FFFFFF,#101814)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Figtree,system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3{font-family:Figtree,system-ui,sans-serif;margin:0;line-height:1.15}
+h1{font-size:clamp(24px,4vw,32px);font-weight:800;letter-spacing:-.015em}h2{font-weight:700}h2{font-size:18px}h3{font-size:15px}
+.app{display:grid;grid-template-columns:232px minmax(0,1fr);min-height:100vh}
+.side{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:4px;padding:18px 12px;background:var(--card);border-right:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;font:800 20px/1.1 Figtree,sans-serif;padding:4px 6px 18px;letter-spacing:-.01em}
+.mark{display:inline-block;flex:none;background:currentColor;-webkit-mask:url(logo.png) center/contain no-repeat;mask:url(logo.png) center/contain no-repeat}
+.brand .mark{width:54px;height:54px;color:var(--acc)}
+.brand small{display:block;font:500 12px Figtree,sans-serif;color:var(--mute)}
+.ghost{display:block;margin:0 auto 10px;width:120px;height:120px;color:var(--acc);opacity:.35}
+.nav{display:flex;align-items:center;gap:10px;width:100%;min-height:44px;padding:0 12px;border-radius:10px;border:0;background:none;color:var(--mute);font:500 15px Figtree,sans-serif;cursor:pointer;text-align:left}
+.nav svg{flex:none}
+.nav.on{background:var(--soft);color:var(--ink);font-weight:600}
+.me{margin-top:auto;display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--line);border-radius:12px;background:none;color:var(--ink);font:inherit;cursor:pointer;text-align:left;width:100%}
+.av{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:14px;flex:none;background:var(--soft);color:var(--ink)}
+.av.lg{width:52px;height:52px;font-size:20px;border-radius:14px}
+.topm{display:none;align-items:center;gap:10px;padding:10px 16px;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:6}
+main{width:100%;max-width:1280px;margin:0 auto;padding:24px max(3vw,16px) 64px;display:flex;flex-direction:column;gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:clamp(14px,2.4vw,22px)}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.sp{margin-left:auto}
+button.b{font:600 15px Figtree,sans-serif;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;white-space:nowrap}
+button.pri{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
+button.danger{color:var(--warn)}
+button.sm{min-height:38px;padding:0 12px;font-size:14px}
+button:disabled{opacity:.5;cursor:not-allowed}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+input,select,textarea{font:inherit;font-size:16px;color:var(--ink);background:var(--field);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%;min-height:44px}
+textarea{resize:vertical;min-height:90px}
+label.f{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:600;color:var(--mute)}
+.g{display:grid;gap:12px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.g4{grid-template-columns:repeat(4,minmax(0,1fr))}.g5{grid-template-columns:repeat(5,minmax(0,1fr))}
+fieldset{border:1px solid var(--line);border-radius:12px;padding:14px 16px 16px;margin:0;display:grid;gap:12px}
+legend{font:700 16px Figtree,sans-serif;padding:0 6px}
+.yn{display:flex;gap:6px;flex-wrap:wrap}
+.yn label{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:10px;padding:0 14px;min-height:44px;font-weight:500;cursor:pointer;color:var(--ink);font-size:15px;background:var(--field)}
+.yn label:has(input:checked){border-color:var(--acc);background:var(--soft);font-weight:600}
+.yn input{width:auto;min-height:0;margin:0;accent-color:var(--acc)}
+.ynq{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:600;color:var(--mute)}
+.pill{font-size:12px;padding:3px 10px;border-radius:999px;background:var(--soft);color:var(--ink);font-weight:600;white-space:nowrap}
+.pill.bad{background:var(--warn-bg);color:var(--warn)}.pill.am{background:var(--amber-bg);color:var(--amber)}
+.muted{color:var(--mute)}.small{font-size:13px}
+.empty{padding:28px 12px;text-align:center;color:var(--mute)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
+.pc{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;text-align:left;font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;cursor:pointer}
+.pc:hover{border-color:var(--acc)}
+.pc .av{grid-row:span 3;width:44px;height:44px;border-radius:12px}
+.pc b{font-size:16px}
+.kv{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px 20px}
+.kv span{display:block;font-size:12px;color:var(--mute)}
+.kv b{font-weight:500;overflow-wrap:anywhere}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tab{flex:none;font:600 15px Figtree,sans-serif;min-height:44px;padding:0 14px;border:0;border-bottom:3px solid transparent;background:none;color:var(--mute);cursor:pointer;white-space:nowrap}
+.tab.on{color:var(--ink);border-bottom-color:var(--acc)}
+.vac{display:grid;grid-template-columns:minmax(0,1.3fr) auto minmax(0,1fr);gap:8px 12px;align-items:center;padding:6px 0;border-top:1px solid var(--line)}
+.vac:first-of-type{border-top:0}
+.tl{position:relative;padding-left:22px;margin-top:6px}
+.tl::before{content:"";position:absolute;left:6px;top:8px;bottom:8px;width:2px;background:var(--line)}
+.hist{position:relative;border:1px solid var(--line);border-radius:12px;margin-top:10px;background:var(--card)}
+.hist::before{content:"";position:absolute;left:-21px;top:17px;width:12px;height:12px;border-radius:50%;background:var(--acc);border:2px solid var(--bg)}
+.hist>summary{list-style:none;cursor:pointer;padding:12px 14px;display:grid;gap:2px;min-height:44px}
+.hist>summary::-webkit-details-marker{display:none}
+.hist[open]>summary{border-bottom:1px solid var(--line)}
+.hbody{padding:14px;display:grid;gap:14px}
+.hbody h4{margin:0 0 2px;font-size:12px;color:var(--mute);font-weight:600}
+.hbody p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.cons{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.cons div{border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+.cons span{display:block;font-size:11px;color:var(--mute)}
+.feed{display:grid;gap:0}
+.fi{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 12px;align-items:start;padding:12px 4px;border-top:1px solid var(--line);text-align:left;font:inherit;color:var(--ink);background:none;border-left:0;border-right:0;border-bottom:0;cursor:pointer;width:100%}
+.fi:first-child{border-top:0}
+.fi:hover{background:var(--soft)}
+.actions{position:sticky;bottom:0;background:var(--card);border-top:1px solid var(--line);margin:4px calc(-1*clamp(14px,2.4vw,22px)) calc(-1*clamp(14px,2.4vw,22px));padding:12px clamp(14px,2.4vw,22px) calc(12px + env(safe-area-inset-bottom));border-radius:0 0 14px 14px;display:flex;gap:10px}
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:10px;font-weight:600;opacity:0;transition:opacity .2s;pointer-events:none;z-index:20}
+.toast.on{opacity:1}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;place-items:center;padding:16px;z-index:15}
+.modal.on{display:grid}.modal .card{max-width:440px}
+.banner{background:var(--warn-bg);color:var(--warn);border-radius:12px;padding:12px 16px;font-weight:500}
+.fab{display:none}
+.seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--card)}
+.seg button{flex:1;font:600 14px Figtree,sans-serif;min-height:44px;padding:0 14px;border:0;background:none;color:var(--mute);cursor:pointer}
+.seg button.on{background:var(--soft);color:var(--ink)}
+.scroll{overflow-x:auto}
+.tbl{width:100%;border-collapse:collapse;font-size:14px;min-width:1040px}
+.tbl th,.tbl td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+.tbl th{position:sticky;top:0;background:var(--card);font-size:12px;color:var(--mute);font-weight:600;padding:0;z-index:1}
+.tbl th button{font:inherit;color:inherit;background:none;border:0;padding:10px 12px;min-height:40px;cursor:pointer;width:100%;text-align:left;white-space:nowrap}
+.tbl th button[aria-sort]{color:var(--ink)}
+.tbl tbody tr{cursor:pointer}.tbl tbody tr:hover,.tbl tbody tr:focus-visible{background:var(--soft)}
+.tbl td.num{text-align:right;font-variant-numeric:tabular-nums}
+.filters{display:grid;grid-template-columns:minmax(0,2fr) repeat(2,minmax(0,1fr)) auto;gap:10px;align-items:end}
+.ext{background:var(--amber-bg)}
+.chk{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:500;color:var(--ink);min-height:44px}
+.chk input{width:20px;height:20px;min-height:0;accent-color:var(--acc)}
+.log{display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 12px;padding:10px 0;border-top:1px solid var(--line)}
+.log:first-child{border-top:0}
+.tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--soft);color:var(--ink)}
+.tag.ext{background:var(--amber-bg);color:var(--amber)}
+.hide{display:none!important}
+@media(max-width:899px){.filters{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.filters>label:first-child{grid-column:1/-1}}
+@media(max-width:899px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .side{position:fixed;inset:auto 0 0 0;height:auto;flex-direction:row;padding:6px 6px calc(6px + env(safe-area-inset-bottom));border-right:0;border-top:1px solid var(--line);z-index:8;gap:2px}
+  .side .brand,.side .me{display:none}
+  .nav{flex-direction:column;gap:2px;justify-content:center;font-size:11px;min-height:54px;padding:4px 2px;text-align:center}
+  .topm{display:flex}
+  main{padding-bottom:110px}
+  body.editing .side,body.editing .fab{display:none}
+  body.editing main{padding-bottom:40px}
+  .fab{display:grid;place-items:center;position:fixed;right:16px;bottom:calc(80px + env(safe-area-inset-bottom));width:58px;height:58px;border-radius:18px;border:0;background:var(--acc);color:var(--acc-ink);font-size:30px;box-shadow:0 6px 18px rgba(0,0,0,.25);z-index:7;cursor:pointer}
+  .hide-m{display:none}
+  .g4,.g5,.kv,.cons{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:minmax(0,1fr)}
+}
+@media(max-width:520px){.g2{grid-template-columns:minmax(0,1fr)}.vac{grid-template-columns:minmax(0,1fr) auto}.vac input[type=date]{grid-column:1/-1}.fi{grid-template-columns:auto minmax(0,1fr)}.fi .when{grid-column:2}}
+@media(prefers-reduced-motion:reduce){.toast{transition:none}}
+
+body.auth .app,body.auth .fab{display:none!important}
+.authw{min-height:100vh;display:none;place-items:center;padding:24px 16px}
+body.auth .authw{display:grid}
+.authc{width:100%;max-width:420px;display:grid;gap:14px}
+.authc>.mark{width:120px;height:120px;color:var(--acc);margin:0 auto}
+.authc h1{text-align:center}
+.gbtn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%}
+.or{display:flex;align-items:center;gap:10px;color:var(--mute);font-size:13px}.or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}
+.linkb{background:none;border:0;color:var(--acc);font:600 14px Figtree,sans-serif;cursor:pointer;padding:0 4px;min-height:44px}
+.msg{font-size:14px;border-radius:10px;padding:10px 12px;background:var(--soft)}.msg.bad{background:var(--warn-bg);color:var(--warn)}
+</style>
+</head>
+<body class="auth">
+<div class="authw">
+<div class="authc">
+  <span class="mark" role="img" aria-label="Logo de la clínica"></span>
+  <h1>TuCita Vet</h1>
+  <p class="muted" style="margin:-8px 0 0;text-align:center">Fichas clínicas de la clínica, en línea para todo el equipo.</p>
+
+  <!-- Ingresar / crear cuenta -->
+  <form id="pLogin" class="card g" novalidate>
+    <div class="seg" role="group" aria-label="Modo"><button type="button" data-am="in" class="on">Ingresar</button><button type="button" data-am="up">Crear cuenta</button></div>
+    <button type="button" class="b gbtn" id="btnGoogle"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.5l6.7-6.7C35.6 2.4 30.2 0 24 0 14.6 0 6.6 5.4 2.6 13.3l7.8 6C12.3 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4 7.1-10 7.1-17.5z"/><path fill="#FBBC05" d="M10.4 28.7c-.5-1.4-.8-3-.8-4.7s.3-3.2.8-4.7l-7.8-6C.9 16.6 0 20.2 0 24s.9 7.4 2.6 10.7l7.8-6z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.5-5.8c-2.1 1.4-4.8 2.3-8.4 2.3-6.3 0-11.7-4.1-13.6-9.8l-7.8 6C6.6 42.6 14.6 48 24 48z"/></svg>Continuar con Google</button>
+    <div class="or">o con tu correo</div>
+    <label class="f hide" id="lNombre">Nombre y apellido<input id="aNombre" autocomplete="name"></label>
+    <label class="f">Correo electrónico<input id="aEmail" type="email" autocomplete="email" inputmode="email"></label>
+    <label class="f">Contraseña<input id="aPass" type="password" autocomplete="current-password" minlength="8"></label>
+    <p class="msg hide" id="aMsg" role="status"></p>
+    <button class="b pri" type="submit" id="aSubmit">Ingresar</button>
+    <button type="button" class="linkb" id="btnOlvide">¿Olvidaste tu contraseña?</button>
+  </form>
+
+  <!-- Nueva contraseña (al volver del correo de recuperación) -->
+  <form id="pClave" class="card g hide" novalidate>
+    <h2>Crea una nueva contraseña</h2>
+    <label class="f">Nueva contraseña (mínimo 8 caracteres)<input id="nPass" type="password" autocomplete="new-password" minlength="8"></label>
+    <p class="msg hide" id="nMsg" role="status"></p>
+    <button class="b pri" type="submit">Guardar contraseña</button>
+  </form>
+
+  <!-- Cuenta pendiente de aprobación -->
+  <div id="pPendiente" class="card g hide">
+    <h2>Tu cuenta espera aprobación</h2>
+    <p style="margin:0">Ya creaste tu cuenta con <b id="pendEmail"></b>. Por seguridad, un administrador de la clínica debe aprobarte antes de que puedas ver las fichas. Avísale y vuelve a revisar.</p>
+    <div class="row"><button class="b" id="btnSalir2">Cerrar sesión</button><button class="b pri sp" id="btnReintentar">Ya me aprobaron</button></div>
+  </div>
+
+  <!-- Falta configurar -->
+  <div id="pConfig" class="card g hide">
+    <h2>Falta conectar Supabase</h2>
+    <p style="margin:0">Abre el archivo <b>config.js</b> y pega la URL y la clave pública (anon key) de tu proyecto de Supabase. La guía README.md explica dónde encontrarlas.</p>
+  </div>
+</div>
+</div>
+
+<div class="app">
+<nav class="side" aria-label="Menú">
+  <div class="brand"><span class="mark" role="img" aria-label="Logo de la clínica"></span><span>TuCita Vet<small>Fichas clínicas</small></span></div>
+  <button class="nav on" data-nav="vLista"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>Pacientes</button>
+  <button class="nav" data-nav="vActividad"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>Actividad</button>
+  <button class="nav" data-nav="vControles"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>Controles</button>
+  <button class="nav" data-nav="vEquipo"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M17 14c2.3 0 4 1.5 4.6 4"/></svg>Equipo</button>
+  <button class="me" id="meBtn" aria-label="Mi perfil"><span class="av" id="meAv">?</span><span><b id="meName" style="display:block;font-size:14px">Mi perfil</b><span class="muted small" id="meRole"></span></span></button>
+  <button class="nav hide-m" id="btnSalir3" style="margin-top:6px"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l5-5-5-5M15 12H3"/></svg>Cerrar sesión</button>
+</nav>
+
+<div>
+<div class="topm"><span class="mark" role="img" aria-label="Logo de la clínica" style="width:38px;height:38px;color:var(--acc)"></span><b style="font-size:18px;font-weight:800">TuCita Vet</b><button class="av sp" id="meBtnM" aria-label="Mi perfil" style="border:0;cursor:pointer;font:inherit;font-weight:700">?</button></div>
+<main>
+<div class="banner hide" id="banner"></div>
+
+<!-- PACIENTES -->
+<section id="vLista" class="g">
+  <div class="row"><h1>Pacientes</h1><span class="pill" id="countPac"></span><button class="b pri sp hide-m" id="btnNuevoPac">+ Nuevo paciente</button></div>
+  <div class="filters">
+    <label class="f">Buscar<input id="q" type="search" placeholder="Nombre, tutor, RUT, teléfono, N° de ficha o microchip" autocomplete="off"></label>
+    <label class="f">Especie<select id="fEsp"><option value="">Todas</option><option>Canino</option><option>Felino</option><option>Otro</option></select></label>
+    <label class="f">Atendido por<select id="fMed"><option value="">Todo el equipo</option></select></label>
+    <div class="seg" role="group" aria-label="Vista"><button data-mode="tabla" class="on">Tabla</button><button data-mode="tarjetas">Tarjetas</button></div>
+  </div>
+  <div class="card" id="tblWrap" style="padding:0">
+    <div class="row" style="padding:10px 14px;border-bottom:1px solid var(--line)"><span class="muted small" id="tblInfo"></span><button class="b sm sp" id="btnCopyTbl">Copiar tabla para Excel</button></div>
+    <div class="scroll" style="max-height:70vh"><table class="tbl"><thead><tr id="tblHead"></tr></thead><tbody id="tblBody"></tbody></table></div>
+  </div>
+  <div class="cards hide" id="listPac"></div>
+  <div class="empty" id="emptyPac"><span class="mark ghost" aria-hidden="true"></span><span id="emptyPacTxt">Cargando pacientes…</span></div>
+</section>
+
+<!-- ACTIVIDAD -->
+<section id="vActividad" class="g hide">
+  <div class="row"><h1>Actividad reciente</h1></div>
+  <div class="tabs" role="tablist"><button class="tab on" data-feed="todas">Todas</button><button class="tab" data-feed="mias">Mis atenciones</button></div>
+  <div class="card" style="padding:6px 14px"><div class="feed" id="feed"></div></div>
+</section>
+
+<!-- CONTROLES -->
+<section id="vControles" class="g hide">
+  <div class="row"><h1>Próximos controles</h1></div>
+  <p class="muted" style="margin:0">Pacientes con control agendado en una consulta, para hacerles seguimiento.</p>
+  <div class="card" style="padding:6px 14px"><div class="feed" id="ctrlList"></div></div>
+</section>
+
+<!-- EQUIPO -->
+<section id="vEquipo" class="g hide">
+  <div class="row"><h1>Equipo clínico</h1><button class="b sp" id="btnPerfil2">Editar mi perfil</button></div>
+  <div class="card" style="padding:6px 14px"><div class="feed" id="teamList"></div></div>
+  <div class="card g hide" id="pendCard"><h2>Esperando aprobación</h2><div class="feed" id="pendList"></div></div>
+  <div class="card g"><h2>Sumar a alguien del equipo</h2><p class="muted" style="margin:0">Envíale la dirección de esta página. Que cree su cuenta con su correo o con Google; aparecerá en “Esperando aprobación” y un administrador la aprueba. Desde ahí, todo lo que registre quedará firmado con su nombre.</p><div class="row"><button class="b sm" id="btnCopyUrl">Copiar dirección de la app</button></div></div>
+</section>
+
+<!-- PERFIL -->
+<section id="vPerfil" class="hide">
+<form id="fPerfil" class="card g" novalidate>
+  <span class="mark ghost" style="opacity:1;width:96px;height:96px;margin:0" aria-hidden="true"></span>
+  <h1 id="perfilTitle">Tu perfil en la clínica</h1>
+  <p class="muted" style="margin:0">Así aparecerás como responsable de cada ficha y consulta que registres.</p>
+  <div class="g g2">
+    <label class="f">Nombre y apellido *<input data-k="nombre" required autocomplete="name"></label>
+    <label class="f">Cargo<select data-k="cargo"><option>Médico veterinario</option><option>Técnico veterinario</option><option>Asistente</option><option>Recepción</option><option>Administración</option></select></label>
+  </div>
+  <label class="f">N° de registro / RUT profesional (opcional)<input data-k="registro"></label>
+  <div class="actions"><button type="button" class="b" id="perfilCancel">Cancelar</button><button type="button" class="b danger" id="btnSalir">Cerrar sesión</button><button class="b pri sp" type="submit">Guardar perfil</button></div>
+</form>
+</section>
+
+<!-- FICHA PACIENTE -->
+<section id="vPaciente" class="g hide">
+  <div class="row"><button class="b sm" data-back>← Pacientes</button></div>
+  <div class="card g" id="pacHead"></div>
+  <div class="tabs" role="tablist"><button class="tab on" data-ptab="hist" id="tabHist">Historial</button><button class="tab" data-ptab="datos">Datos del paciente</button><button class="tab" data-ptab="reg">Dueños y cambios</button></div>
+  <div id="pHist" class="g">
+    <div class="row"><button class="b pri" id="btnNuevaCon">+ Nueva consulta</button></div>
+    <div id="histList"></div>
+  </div>
+  <div id="pDatos" class="card g hide"></div>
+  <div id="pReg" class="g hide"></div>
+</section>
+
+<!-- FORM PACIENTE -->
+<section id="vFormPac" class="hide">
+<form id="fPac" class="card g" novalidate>
+  <div class="row"><h1 id="fPacTitle">Nuevo paciente</h1><span class="pill sp" id="fPacNum"></span></div>
+  <fieldset><legend>Reseña</legend>
+    <div class="g g3">
+      <label class="f">Nombre *<input data-k="nombre" required></label>
+      <label class="f">Especie<select data-k="especie" id="especie"><option>Canino</option><option>Felino</option><option>Otro</option></select></label>
+      <label class="f">Raza<input data-k="raza"></label>
+    </div>
+    <div class="g g4" style="align-items:end">
+      <label class="f">Fecha de nacimiento<input type="date" data-k="fechaNac" id="fNac"></label>
+      <label class="f">Edad: años<input type="number" min="0" max="40" inputmode="numeric" id="edadA" placeholder="0"></label>
+      <label class="f">Edad: meses<input type="number" min="0" max="11" inputmode="numeric" id="edadM" placeholder="0"></label>
+      <label class="chk"><input type="checkbox" id="fAprox">Fecha aproximada</label>
+    </div>
+    <p class="muted small" style="margin:-4px 0 0">Ingresa la fecha de nacimiento o, si el tutor no la sabe, la edad en años y meses: el sistema calcula una fecha aproximada y la edad se mantiene al día.</p>
+    <div class="g g2">
+      <label class="f">Color<input data-k="color"></label>
+      <label class="f">Marca / señas<input data-k="marca"></label>
+    </div>
+    <div class="g g4">
+      <div class="ynq">Sexo<div class="yn"><label><input type="radio" name="sexo" data-k="sexo" value="Hembra">Hembra</label><label><input type="radio" name="sexo" data-k="sexo" value="Macho">Macho</label></div></div>
+      <div class="ynq">Esterilizado<div class="yn"><label><input type="radio" name="est" data-k="esterilizado" value="Sí">Sí</label><label><input type="radio" name="est" data-k="esterilizado" value="No">No</label></div></div>
+      <div class="ynq">Microchip<div class="yn"><label><input type="radio" name="chip" data-k="microchip.tiene" value="Sí">Sí</label><label><input type="radio" name="chip" data-k="microchip.tiene" value="No">No</label></div></div>
+      <label class="f">N° microchip<input data-k="microchip.numero" inputmode="numeric"></label>
+    </div>
+  </fieldset>
+  <fieldset id="fsTutor"><legend>Datos del tutor</legend>
+    <p class="banner hide" id="cambioTutorNote" style="margin:0;background:var(--amber-bg);color:var(--amber)">Cambio de dueño: ingresa los datos del nuevo tutor. El tutor anterior queda guardado en el registro de la ficha.</p>
+    <div class="g g2">
+      <label class="f">Nombre<input data-k="tutor.nombre"></label>
+      <label class="f">RUT<input data-k="tutor.rut" placeholder="12.345.678-9"></label>
+    </div>
+    <label class="f">Dirección<input data-k="tutor.direccion"></label>
+    <div class="g g2">
+      <label class="f">Correo electrónico<input type="email" data-k="tutor.email"></label>
+      <label class="f">N° de contacto<input type="tel" data-k="tutor.telefono" placeholder="+569"></label>
+    </div>
+  </fieldset>
+  <fieldset><legend>Vacunas (última fecha)</legend>
+    <div id="vacGen"></div>
+    <div id="vacFel"><h3 class="muted" style="margin:8px 0 2px">Felinos</h3></div>
+    <div id="vacCan"><h3 class="muted" style="margin:8px 0 2px">Caninos</h3></div>
+  </fieldset>
+  <fieldset><legend>Desparasitaciones</legend>
+    <div class="g g3">
+      <div class="ynq">Interna<div class="yn"><label><input type="radio" name="dInt" data-k="desparasitacion.interna" value="Sí">Sí</label><label><input type="radio" name="dInt" data-k="desparasitacion.interna" value="No">No</label></div></div>
+      <div class="ynq">Externa<div class="yn"><label><input type="radio" name="dExt" data-k="desparasitacion.externa" value="Sí">Sí</label><label><input type="radio" name="dExt" data-k="desparasitacion.externa" value="No">No</label></div></div>
+      <label class="f">Producto<input data-k="desparasitacion.producto"></label>
+    </div>
+  </fieldset>
+  <div class="actions"><button type="button" class="b" data-cancel>Cancelar</button><button class="b pri sp" type="submit">Guardar paciente</button></div>
+</form>
+</section>
+
+<!-- FORM CONSULTA -->
+<section id="vFormCon" class="hide">
+<form id="fCon" class="card g" novalidate>
+  <div class="row"><h1 id="fConTitle">Nueva consulta</h1><span class="pill sp" id="fConPac"></span></div>
+  <div class="g g3">
+    <label class="f">Fecha *<input type="date" data-k="fecha" required></label>
+    <label class="f">Tipo de atención<select data-k="tipo" id="selTipo"><option>Consulta</option><option>Control</option><option>Vacunación</option><option>Urgencia</option><option>Cirugía / intervención</option><option>Hospitalización</option><option>Atención en otra clínica</option></select></label>
+    <label class="f">Motivo de consulta<input data-k="motivo" placeholder="Ej: vómitos, control post operatorio"></label>
+  </div>
+  <div class="g g2" id="medInterno">
+    <label class="f">Médico tratante (de la clínica)<select data-k="medicoId" id="selMedico"></select></label>
+  </div>
+  <fieldset class="ext hide" id="medExterno"><legend>Atención fuera de la clínica</legend>
+    <p class="muted small" style="margin:0">Para registrar intervenciones o atenciones que la mascota tuvo con otros veterinarios, según lo que informe el tutor o sus documentos.</p>
+    <div class="g g2">
+      <label class="f">Clínica / centro<input data-k="externo.clinica"></label>
+      <label class="f">Veterinario/a que atendió<input data-k="externo.veterinario"></label>
+    </div>
+  </fieldset>
+  <label class="f">Anamnesis remota<textarea data-k="anamnesisRemota"></textarea></label>
+  <label class="f">Anamnesis actual<textarea data-k="anamnesisActual"></textarea></label>
+  <fieldset><legend>Dieta suministrada</legend>
+    <div class="g g3">
+      <label class="f">Seca<input data-k="dieta.seca"></label>
+      <label class="f">Húmeda<input data-k="dieta.humeda"></label>
+      <label class="f">Casera<input data-k="dieta.casera"></label>
+      <label class="f">Frecuencia<input data-k="dieta.frecuencia"></label>
+      <label class="f">Cantidad<input data-k="dieta.cantidad"></label>
+      <label class="f">Otros<input data-k="dieta.otros"></label>
+    </div>
+  </fieldset>
+  <label class="f">¿Ha tenido enfermedades previas?<input data-k="enfermedadesPrevias"></label>
+  <div class="g g3" style="align-items:end">
+    <div class="ynq">¿Tratamiento para la enfermedad actual?<div class="yn"><label><input type="radio" name="trat" data-k="tratamientoPrevio.si" value="Sí">Sí</label><label><input type="radio" name="trat" data-k="tratamientoPrevio.si" value="No">No</label></div></div>
+    <label class="f" style="grid-column:span 2">¿Cuál?<input data-k="tratamientoPrevio.cual"></label>
+  </div>
+  <label class="f">¿Es alérgica a algún medicamento o vacuna?<input data-k="alergias"></label>
+  <fieldset><legend>Constantes fisiológicas</legend>
+    <div class="g g5">
+      <label class="f">Peso (kg)<input data-k="constantes.peso" inputmode="decimal"></label>
+      <label class="f">T° (°C)<input data-k="constantes.temp" inputmode="decimal"></label>
+      <label class="f">FC (lpm)<input data-k="constantes.fc" inputmode="numeric"></label>
+      <label class="f">FR (rpm)<input data-k="constantes.fr" inputmode="numeric"></label>
+      <label class="f">Pulso<input data-k="constantes.pulso"></label>
+      <label class="f">TLLC (s)<input data-k="constantes.tllc"></label>
+      <label class="f">% DH<input data-k="constantes.dh"></label>
+      <label class="f">Mucosas<input data-k="constantes.mucosas"></label>
+      <label class="f">CC<input data-k="constantes.cc" placeholder="1–9"></label>
+    </div>
+  </fieldset>
+  <label class="f">Examen físico<textarea data-k="examenFisico" style="min-height:140px"></textarea></label>
+  <label class="f">Exámenes complementarios<textarea data-k="examenesComplementarios"></textarea></label>
+  <label class="f">Prediagnósticos<textarea data-k="prediagnosticos"></textarea></label>
+  <label class="f">Indicaciones<textarea data-k="indicaciones" style="min-height:120px"></textarea></label>
+  <label class="f" style="max-width:280px">Próximo control (seguimiento)<input type="date" data-k="proximoControl"></label>
+  <div class="actions"><button type="button" class="b" data-cancel>Cancelar</button><button class="b pri sp" type="submit">Guardar consulta</button></div>
+</form>
+</section>
+</main>
+</div>
+</div>
+
+<button class="fab" id="fab" aria-label="Nuevo paciente">+</button>
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+  <div class="card g"><h2 id="mTitle"></h2><p id="mText" style="margin:0"></p>
+  <div class="row"><button class="b" id="mNo">Cancelar</button><button class="b pri sp" id="mYes" style="background:var(--warn);border-color:var(--warn)">Eliminar</button></div></div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="config.js"></script>
+<script src="vendor/supabase.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
