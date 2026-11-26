@@ -72,7 +72,7 @@ let equipo = {}, pacientes = [], feedDocs = [], ctrlDocs = [], consultas = [], e
 let semanaCount = 0;
 let cur = null, editPac = null, editCon = null, loaded = false, view = 'vInicio', feedMode = 'todas', pTab = 'hist';
 const openSet = new Set();
-const VIEWS = ['vAgenda', 'vCotizaciones', 'vInventario', 'vFormCita', 'vFormProd', 'vFormCot', 'vFormReceta', 'vInicio', 'vTutores', 'vLista', 'vActividad', 'vControles', 'vEquipo', 'vPerfil', 'vPaciente', 'vFormPac', 'vFormCon'];
+const VIEWS = ['vImport', 'vAgenda', 'vCotizaciones', 'vInventario', 'vFormCita', 'vFormProd', 'vFormCot', 'vFormReceta', 'vInicio', 'vTutores', 'vLista', 'vActividad', 'vControles', 'vEquipo', 'vPerfil', 'vPaciente', 'vFormPac', 'vFormCon'];
 const EDITING = ['vPerfil', 'vFormPac', 'vFormCon', 'vFormCita', 'vFormProd', 'vFormCot', 'vFormReceta'];
 const pacById = (id) => pacientes.find((p) => p.id === id);
 const who = (id) => (id && equipo[id]?.nombre) || (id ? 'Usuario' : '');
@@ -93,7 +93,7 @@ function show(v) {
   view = v;
   VIEWS.forEach((x) => $('#' + x).classList.toggle('hide', x !== v));
   document.body.classList.toggle('editing', EDITING.includes(v));
-  const navFor = { vPaciente: 'vLista', vFormPac: 'vLista', vFormCon: 'vLista', vFormReceta: 'vLista', vFormCita: 'vAgenda', vFormProd: 'vInventario', vFormCot: 'vCotizaciones' }[v] || v;
+  const navFor = { vPaciente: 'vLista', vFormPac: 'vLista', vFormCon: 'vLista', vFormReceta: 'vLista', vFormCita: 'vAgenda', vFormProd: 'vInventario', vFormCot: 'vCotizaciones', vImport: 'vInventario' }[v] || v;
   if (v === 'vAgenda' && started) loadAgenda().then(() => { if (view === 'vAgenda') renderAgenda(); });
   $$('.nav').forEach((b) => b.classList.toggle('on', b.dataset.nav === navFor));
   $('#fab').classList.toggle('hide', !['vLista', 'vInicio', 'vTutores'].includes(v));
@@ -524,9 +524,23 @@ function renderInicio() {
     ['vAgenda', cHoy.length, cHoy.length === 1 ? 'cita agendada para hoy' : 'citas agendadas para hoy', true],
     ['vControles', prox.length, 'controles en los próximos 7 días'],
     ['vActividad', semanaCount, semanaCount === 1 ? 'atención en los últimos 7 días' : 'atenciones en los últimos 7 días'],
-    nLow.length ? ['vInventario', nLow.length, nLow.length === 1 ? 'producto con stock bajo' : 'productos con stock bajo'] : ['vLista', pacientes.length, pacientes.length === 1 ? 'paciente registrado' : 'pacientes registrados']
+    nLow.length ? ['vInventario', nLow.length, nLow.length === 1 ? 'producto con stock bajo' : 'productos con stock bajo', false, 'warn'] : ['vLista', pacientes.length, pacientes.length === 1 ? 'paciente registrado' : 'pacientes registrados']
   ];
-  $('#kpis').innerHTML = K.map(([v, n, l, hl]) => `<button class="kpi ${hl ? 'hl' : ''}" data-go="${v}"><b>${loaded ? n : '–'}</b><span>${l}</span></button>`).join('');
+  $('#kpis').innerHTML = K.map(([v, n, l, hl, cls]) => `<button class="kpi ${cls || ''}" data-go="${v}"><b>${loaded ? n : '–'}</b><span>${l}</span></button>`).join('');
+  const conf = cHoy.filter((c) => c.estado === 'confirmada').length, porConf = cHoy.filter((c) => c.estado === 'agendada').length;
+  $('#wsub').textContent = !loaded ? '' : cHoy.length ? `Tienes ${cHoy.length} cita${cHoy.length === 1 ? '' : 's'} hoy: ${conf} confirmada${conf === 1 ? '' : 's'} y ${porConf} por confirmar.` + (prox.length ? ` Hay ${prox.length} control${prox.length === 1 ? '' : 'es'} esta semana.` : '') : 'No hay citas agendadas para hoy.' + (prox.length ? ` Hay ${prox.length} control${prox.length === 1 ? '' : 'es'} esta semana.` : '');
+  const ahora = Date.now(), sig = citasHoy.filter((c) => ['agendada', 'confirmada'].includes(c.estado) && new Date(c.inicio).getTime() + (c.duracion_min || 30) * 60000 > ahora).sort((a, b) => a.inicio.localeCompare(b.inicio))[0];
+  const nc = $('#nextCita'); nc.classList.toggle('hide', !sig);
+  if (sig) {
+    const x = datosCita(sig), mins = Math.round((new Date(sig.inicio) - ahora) / 60000);
+    nc.dataset.cita = sig.id;
+    nc.innerHTML = `<div><small>${mins > 0 ? (mins < 60 ? `Próxima cita en ${mins} minutos` : `Próxima cita a las ${hhmm(new Date(sig.inicio))}`) : 'Cita en curso'}</small><b>${hhmm(new Date(sig.inicio))} ${esc(x.mascota)}${sig.motivo ? ', ' + esc(sig.motivo.toLowerCase()) : ''}</b><br><span>${esc(x.tutor)}${x.tel ? ', ' + esc(x.tel) : ''}${sig.estado === 'confirmada' ? ' · confirmada' : ''}</span></div>${sig.estado !== 'confirmada' ? '<button type="button" class="b wbtn" data-ca="wa">Enviar recordatorio</button>' : ''}<button type="button" class="b abtn" data-ca="atender">Atender</button>`;
+  }
+  const [h0, m0] = String(clinica.horaInicio || '09:00').split(':').map(Number), [h1, m1] = String(clinica.horaFin || '19:00').split(':').map(Number);
+  const cap = Math.max(1, (h1 * 60 + m1) - (h0 * 60 + m0)), lun = new Date(); lun.setDate(lun.getDate() - ((lun.getDay() + 6) % 7));
+  $('#inOcc').innerHTML = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'].map((n, i) => { const d = new Date(lun); d.setDate(d.getDate() + i); const iso = isoDate(d);
+    const min = citasSemana.filter((c) => c.estado !== 'cancelada' && isoDate(new Date(c.inicio)) === iso).reduce((a, c) => a + (c.duracion_min || 30), 0), p = Math.min(100, Math.round(min / cap * 100));
+    return `<div class="occ"><span class="${iso === today() ? '' : 'muted'}" style="${iso === today() ? 'font-weight:800' : ''}">${n}</span><span class="bar"><i class="${p >= 85 ? 'full' : ''}" style="width:${p}%"></i></span><b>${p}%</b></div>`; }).join('');
   $('#inCitas').innerHTML = citasHoy.length ? citasHoy.map(citaCard).join('') : `<div class="empty">${loaded ? 'No hay citas para hoy.' : 'Cargando…'} <button class="linkb" id="inNuevaCita">+ Agendar una cita</button></div>`;
   const nb = $('#inNuevaCita'); if (nb) nb.onclick = () => openFormCita(null, { fecha: today() });
   $('#inLowCard').classList.toggle('hide', !nLow.length);
@@ -619,6 +633,7 @@ function imprimir(p, lista, conFirma) {
 /* =====================================================================
    MÓDULOS: datos de la clínica, WhatsApp, agenda, inventario, cotizador, recetas
    ===================================================================== */
+let citasSemana = [];
 let clinica = {}, productos = [], citasHoy = [], citasRango = [], cotizaciones = [], recetasPac = [], citasPac = [];
 const clinicName = () => clinica.nombre || CFG.NOMBRE_CLINICA || 'Clínica veterinaria';
 const ivaPct = () => Number(clinica.iva ?? 19) || 0;
@@ -641,6 +656,8 @@ async function loadModulos() {
   clinica = cf.data?.datos || {};
   productos = pr || [];
   citasHoy = ch.data || [];
+  { const l = new Date(dia0); l.setDate(l.getDate() - ((l.getDay() + 6) % 7)); const l2 = new Date(l); l2.setDate(l2.getDate() + 7);
+    const { data: ws } = await sb.from('citas').select('*').gte('inicio', l.toISOString()).lt('inicio', l2.toISOString()); citasSemana = ws || []; }
   cotizaciones = co.data || [];
   if (view === 'vAgenda') await loadAgenda();
   const opt = (v) => `<option value="${esc(v)}"></option>`;
@@ -718,6 +735,7 @@ const parseD = (iso) => new Date(iso + 'T00:00');
 function agRange() {
   const d = parseD(agDate);
   if (agView === 'dia') { const e = new Date(d); e.setDate(e.getDate() + 1); return [d, e]; }
+  if (agView === 'mes') { const f = new Date(d.getFullYear(), d.getMonth(), 1); const s0 = new Date(f); s0.setDate(s0.getDate() - ((f.getDay() + 6) % 7)); const e0 = new Date(s0); e0.setDate(e0.getDate() + 42); return [s0, e0]; }
   const s = new Date(d); const wd = (s.getDay() + 6) % 7; s.setDate(s.getDate() - wd); const e = new Date(s); e.setDate(e.getDate() + 7); return [s, e];
 }
 async function loadAgenda() {
@@ -760,6 +778,8 @@ function renderAgenda() {
       const isNow = agDate === today() && nowM >= m && nowM < next;
       return `<div class="slot ${isNow ? 'now' : ''}"><time>${lab}</time><div>${here.map(citaCard).join('')}${here.length ? '' : `<button type="button" class="slotfree" data-nueva="${lab}">+ Agendar a las ${lab}</button>`}</div></div>`;
     }).join('') + '</div></div>';
+  } else if (agView === 'mes') {
+    renderMes(list, s);
   } else {
     const dias = [...Array(7)].map((_, i) => { const d = new Date(s); d.setDate(d.getDate() + i); return d; });
     $('#agTitulo').textContent = `Semana del ${dias[0].getDate()} al ${dias[6].toLocaleDateString('es-CL', { day: 'numeric', month: 'long' })}`;
@@ -773,9 +793,33 @@ function renderAgenda() {
   const conf = activas.filter((c) => c.estado === 'confirmada').length, pend = activas.filter((c) => c.estado === 'agendada').length;
   $('#agResumen').textContent = activas.length ? `${activas.length} cita${activas.length === 1 ? '' : 's'} · ${conf} confirmada${conf === 1 ? '' : 's'} · ${pend} por confirmar` : 'Sin citas en este período.';
 }
+function renderMes(list, s) {
+  const ref = parseD(agDate), mes = ref.getMonth();
+  const t = ref.toLocaleDateString('es-CL', { month: 'long', year: 'numeric' });
+  $('#agTitulo').textContent = t.charAt(0).toUpperCase() + t.slice(1);
+  const byDay = {}; list.forEach((c) => { const k = isoDate(new Date(c.inicio)); (byDay[k] = byDay[k] || []).push(c); });
+  const max = Math.max(1, ...Object.values(byDay).map((v) => v.filter((c) => c.estado !== 'cancelada').length));
+  let semanas = 6; { const last = new Date(s); last.setDate(last.getDate() + 35); if (last.getMonth() !== mes) semanas = 5; }
+  const cells = [...Array(semanas * 7)].map((_, i) => {
+    const d = new Date(s); d.setDate(d.getDate() + i); const iso = isoDate(d), cs = (byDay[iso] || []).sort((a, b) => a.inicio.localeCompare(b.inicio));
+    const n = cs.filter((c) => c.estado !== 'cancelada').length, alpha = n ? (0.06 + 0.3 * n / max).toFixed(2) : 0;
+    const chips = cs.slice(0, 3).map((c) => `<span class="mc ${esc(c.estado)}"><b>${hhmm(new Date(c.inicio))}</b> ${esc(datosCita(c).mascota)}</span>`).join('');
+    return `<button type="button" class="mday ${d.getMonth() !== mes ? 'out' : ''} ${iso === today() ? 'today' : ''} ${iso === agDate ? 'sel' : ''}" data-mdia="${iso}" style="${n ? `background:linear-gradient(rgba(143,227,198,${alpha}),rgba(143,227,198,${alpha})),var(--card)` : ''}" aria-label="${esc(d.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' }))}: ${n} citas">
+      <span class="dn"><span>${d.getDate()}</span>${n ? `<i>${n}</i>` : ''}</span>${chips}${cs.length > 3 ? `<span class="more small" style="color:var(--acc);font-weight:700">+${cs.length - 3} más</span>` : ''}<span class="mdots">${'<i></i>'.repeat(Math.min(n, 3))}</span></button>`;
+  }).join('');
+  const sel = (byDay[agDate] || []).sort((a, b) => a.inicio.localeCompare(b.inicio));
+  const sinConf = sel.filter((c) => c.estado === 'agendada');
+  const dsel = parseD(agDate), tsel = dsel.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' });
+  $('#agBody').innerHTML = `<div class="legend" style="margin-bottom:10px"><span><i style="background:#DCF0E3"></i>Confirmada</span><span><i style="border:1px solid #B9D8CC"></i>Por confirmar</span><span><i style="background:var(--soft);opacity:.6"></i>Atendida</span><span><i style="background:var(--warn-bg)"></i>Cancelada o no asistió</span><span class="sp">Mientras más verde el fondo, más lleno el día</span></div>
+    <div class="mlay"><div class="month"><div class="wd">${['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map((x) => `<div>${x}</div>`).join('')}</div><div class="gr">${cells}</div></div>
+    <aside class="card g" style="align-content:start"><div><span class="small" style="color:var(--acc);font-weight:700">Día seleccionado</span><h2 style="margin:2px 0 0;font-size:22px">${esc(tsel.charAt(0).toUpperCase() + tsel.slice(1))}</h2><p class="muted small" style="margin:2px 0 0">${sel.length ? `${sel.length} cita${sel.length === 1 ? '' : 's'}${sinConf.length ? `, ${sinConf.length} sin confirmar` : ''}` : 'Sin citas'}</p></div>
+      <div>${sel.map(citaCard).join('') || '<div class="empty" style="padding:12px">Día libre.</div>'}</div>
+      <button type="button" class="b pri" data-nuevadia="${agDate}">+ Agendar este día</button><button type="button" class="b" data-dia="${agDate}">Ver el día completo</button></aside></div>`;
+}
 async function agGo(fn) { fn(); await loadAgenda(); renderAgenda(); }
-$('#agPrev').onclick = () => agGo(() => { const d = parseD(agDate); d.setDate(d.getDate() - (agView === 'dia' ? 1 : 7)); agDate = isoDate(d); });
-$('#agNext').onclick = () => agGo(() => { const d = parseD(agDate); d.setDate(d.getDate() + (agView === 'dia' ? 1 : 7)); agDate = isoDate(d); });
+const agStep = (k) => agGo(() => { const d = parseD(agDate); if (agView === 'mes') { d.setDate(1); d.setMonth(d.getMonth() + k); } else d.setDate(d.getDate() + k * (agView === 'dia' ? 1 : 7)); agDate = isoDate(d); });
+$('#agPrev').onclick = () => agStep(-1);
+$('#agNext').onclick = () => agStep(1);
 $('#agHoy').onclick = () => agGo(() => { agDate = today(); });
 $('#agFecha').onchange = (e) => { if (e.target.value) agGo(() => { agDate = e.target.value; }); };
 $$('[data-agv]').forEach((b) => b.addEventListener('click', () => agGo(() => { agView = b.dataset.agv; })));
@@ -796,6 +840,7 @@ async function citaAccion(c, a) {
 let pendingMotivo = '';
 function citaClick(e) {
   const nb = e.target.closest('[data-nueva]'); if (nb) return openFormCita(null, { fecha: agDate, hora: nb.dataset.nueva });
+  const md = e.target.closest('[data-mdia]'); if (md) { const prevM = agDate.slice(0, 7); agDate = md.dataset.mdia; if (agDate.slice(0, 7) === prevM) renderAgenda(); else agGo(() => {}); return; }
   const nd = e.target.closest('[data-nuevadia]'); if (nd) return openFormCita(null, { fecha: nd.dataset.nuevadia });
   const dd = e.target.closest('[data-dia]'); if (dd) return agGo(() => { agDate = dd.dataset.dia; agView = 'dia'; });
   const wc = e.target.closest('[data-wcita]'); if (wc) { const c = citasRango.find((x) => x.id === wc.dataset.wcita); if (c) openFormCita(c); return; }
@@ -806,6 +851,7 @@ function citaClick(e) {
 }
 $('#agBody').addEventListener('click', citaClick);
 $('#inCitas').addEventListener('click', citaClick);
+$('#nextCita').addEventListener('click', citaClick);
 $('#pCit').addEventListener('click', citaClick);
 
 /* Formulario de cita */
@@ -964,7 +1010,7 @@ $('#btnNuevaCot').onclick = () => openFormCot();
 let editCot = null, cotPac = null;
 const setCotPac = pickerInit('cot', (p) => { cotPac = p; });
 function itemRow(it = {}) {
-  return `<tr><td><input class="it-desc" list="dlProd" value="${esc(it.descripcion || '')}" placeholder="Ej: Esterilización hembra, Jeringa 3 ml" aria-label="Descripción"></td>
+  return `<tr><td><input class="it-desc" autocomplete="off" value="${esc(it.descripcion || '')}" placeholder="Ej: Esterilización hembra, Jeringa 3 ml" aria-label="Descripción"></td>
     <td><input class="it-cant" type="number" min="0" step="any" value="${esc(String(it.cantidad ?? 1))}" inputmode="decimal" aria-label="Cantidad"></td>
     <td><input class="it-precio" type="number" min="0" step="1" value="${esc(String(it.precio ?? ''))}" inputmode="numeric" aria-label="Precio unitario neto"></td>
     <td class="money it-sub" style="padding-top:12px"></td><td><button type="button" class="b sm it-del" aria-label="Quitar ítem">✕</button></td></tr>`;
@@ -1029,7 +1075,7 @@ $('#btnCotPrint').onclick = () => { if (editCot) imprimirCot(editCot); };
 let editRec = null, recConsulta = null;
 function medRow(m = {}) {
   const inp = (cls, v, ph, extra = '') => `<td><input class="${cls}" value="${esc(v || '')}" placeholder="${ph}" ${extra}></td>`;
-  return `<tr>${inp('m-med', m.medicamento, 'Nombre', 'list="dlMed" aria-label="Medicamento"')}${inp('m-pres', m.presentacion, 'Comp. 50 mg', 'aria-label="Presentación"')}${inp('m-dosis', m.dosis, '1/2 comp.', 'aria-label="Dosis"')}${inp('m-via', m.via, 'Oral', 'aria-label="Vía"')}${inp('m-frec', m.frecuencia, 'Cada 12 h', 'aria-label="Frecuencia"')}${inp('m-dur', m.duracion, '7 días', 'aria-label="Duración"')}<td><button type="button" class="b sm m-del" aria-label="Quitar">✕</button></td></tr>`;
+  return `<tr>${inp('m-med', m.medicamento, 'Nombre', 'autocomplete="off" aria-label="Medicamento"')}${inp('m-pres', m.presentacion, 'Comp. 50 mg', 'aria-label="Presentación"')}${inp('m-dosis', m.dosis, '1/2 comp.', 'aria-label="Dosis"')}${inp('m-via', m.via, 'Oral', 'aria-label="Vía"')}${inp('m-frec', m.frecuencia, 'Cada 12 h', 'aria-label="Frecuencia"')}${inp('m-dur', m.duracion, '7 días', 'aria-label="Duración"')}<td><button type="button" class="b sm m-del" aria-label="Quitar">✕</button></td></tr>`;
 }
 $('#btnAddMed').onclick = () => { $('#recItems').insertAdjacentHTML('beforeend', medRow()); $('#recItems tr:last-child .m-med').focus(); };
 $('#recItems').addEventListener('click', (e) => { if (e.target.closest('.m-del')) e.target.closest('tr').remove(); });
@@ -1126,6 +1172,192 @@ $('#moreSheet').addEventListener('click', (e) => {
   if (b) { if (b.dataset.more === 'salir') salir(); else show(b.dataset.more); }
 });
 $$('[data-cancel-to]').forEach((b) => b.addEventListener('click', () => (b.dataset.cancelTo === 'vPaciente' && pacById(cur) ? openPaciente(cur) : show(b.dataset.cancelTo))));
+
+
+/* =====================================================================
+   IMPORTAR INVENTARIO DESDE EXCEL + BUSCADOR DESPLEGABLE
+   ===================================================================== */
+const normTxt = (v) => String(v ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+const parseNum = (v) => {
+  if (typeof v === 'number') return v;
+  let t = String(v ?? '').replace(/[^\d,.\-]/g, '');
+  if (!t) return NaN;
+  if (t.includes(',') && t.includes('.')) t = t.replace(/\./g, '').replace(',', '.');
+  else if (t.includes(',')) t = t.replace(',', '.');
+  else if (/^\-?\d{1,3}(\.\d{3})+$/.test(t)) t = t.replace(/\./g, '');
+  return Number(t);
+};
+const tipoDe = (v) => { const t = normTxt(v); if (!t) return ''; if (/medic|farmac|vacun|antib|f[aá]rm/.test(t)) return 'medicamento'; if (/proced|cirug|operac/.test(t)) return 'procedimiento'; if (/servic|consult|atenc/.test(t)) return 'servicio'; return 'insumo'; };
+const IMP_FIELDS = [
+  ['nombre', 'Nombre (obligatorio)', /^(nombre|producto|insumo|descripci|art[ií]culo|item|detalle)/],
+  ['tipo', 'Tipo', /^(tipo|categor|familia|clase)/],
+  ['unidad', 'Unidad', /^(unidad|u\.?\s*medida|medida|formato)/],
+  ['stock', 'Stock actual', /^(stock|cantidad|existencia|saldo|inventario)/],
+  ['stock_minimo', 'Stock mínimo', /(minimo|min\.?$|critico|alerta)/],
+  ['costo', 'Costo neto', /^(costo|precio\s*(de\s*)?compra|valor\s*compra|compra)/],
+  ['precio', 'Precio neto de venta', /^(precio|valor|venta|pvp|tarifa)/]
+];
+let impHeaders = [], impRows = [], impMap = {}, impRes = [], impFileName = '';
+function impSteps(n) { $$('#impSteps > div').forEach((d, i) => { d.className = i < n ? 'done' : i === n ? 'now' : ''; d.querySelector('b').textContent = i < n ? '✓' : String(i + 1); }); }
+function impAutoMap() {
+  impMap = {}; const used = new Set(); const H = impHeaders.map(normTxt);
+  ['stock_minimo', 'nombre', 'tipo', 'unidad', 'costo', 'precio', 'stock'].forEach((k) => {
+    const re = IMP_FIELDS.find((f) => f[0] === k)[2];
+    const i = H.findIndex((h, j) => !used.has(j) && h && re.test(h));
+    impMap[k] = i; if (i >= 0) used.add(i);
+  });
+}
+function impAnalyze() {
+  const val = (r, k) => (impMap[k] >= 0 ? r[impMap[k]] : '');
+  const existentes = new Map(productos.map((p) => [normTxt(p.nombre), p])), vistos = new Set();
+  impRes = impRows.map((r, idx) => {
+    const nombre = String(val(r, 'nombre') ?? '').trim();
+    const o = { fila: idx + 2, nombre, tipo: tipoDe(val(r, 'tipo')), unidad: String(val(r, 'unidad') || '').trim(), stock: parseNum(val(r, 'stock')), stock_minimo: parseNum(val(r, 'stock_minimo')), costo: parseNum(val(r, 'costo')), precio: parseNum(val(r, 'precio')), raw: r };
+    if (r.every((c) => String(c ?? '').trim() === '')) return null;
+    if (!nombre) return { ...o, estado: 'error', motivo: 'Falta el nombre' };
+    const key = normTxt(nombre);
+    if (vistos.has(key)) return { ...o, estado: 'error', motivo: 'Nombre repetido en el archivo' };
+    vistos.add(key);
+    for (const k of ['stock', 'stock_minimo', 'costo', 'precio']) if (impMap[k] >= 0 && String(val(r, k) ?? '').trim() !== '' && isNaN(o[k])) return { ...o, estado: 'error', motivo: `“${val(r, k)}” no es un número válido` };
+    const ex = existentes.get(key);
+    return ex ? { ...o, estado: 'actualiza', ex } : { ...o, estado: 'nuevo' };
+  }).filter(Boolean);
+}
+const EST_IMP = { nuevo: ['Nuevo', 'confirmada'], actualiza: ['Actualiza stock y precio', ''], error: ['', 'cancelada'] };
+function renderImport() {
+  const tiene = impRows.length > 0;
+  $('#impMapBox').classList.toggle('hide', !tiene); $('#impPrevBox').classList.toggle('hide', !tiene); $('#impSum').classList.toggle('hide', !tiene);
+  $('#impFile').textContent = tiene ? impFileName : 'Elige tu archivo .xlsx o .csv';
+  $('#impFileSub').textContent = tiene ? `${impRows.length} filas con datos` : 'O arrástralo aquí. La primera fila debe tener los nombres de las columnas.';
+  if (!tiene) { impSteps(0); return; }
+  impSteps(1);
+  const opts = (sel) => '<option value="-1">— No importar —</option>' + impHeaders.map((h, i) => `<option value="${i}" ${i === sel ? 'selected' : ''}>${esc(h || `Columna ${i + 1}`)}</option>`).join('');
+  $('#impMap').innerHTML = IMP_FIELDS.map(([k, l]) => `<div class="mapr"><span title="${esc(l)}">${esc(l)}</span><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--acc)"><path d="M19 12H5M11 6l-6 6 6 6"/></svg><label><span class="hide">Columna para ${esc(l)}</span><select data-impf="${k}" style="min-height:40px">${opts(impMap[k])}</select></label></div>`).join('');
+  impAnalyze();
+  const n = impRes.filter((r) => r.estado === 'nuevo').length, a = impRes.filter((r) => r.estado === 'actualiza').length, e = impRes.filter((r) => r.estado === 'error').length;
+  const prev = [...impRes.filter((r) => r.estado === 'error'), ...impRes.filter((r) => r.estado !== 'error')].slice(0, 12);
+  const f = (v, money) => (isNaN(v) ? '<span class="muted">—</span>' : money ? CLP(v) : esc(String(v)));
+  $('#impPrev').innerHTML = prev.map((r) => `<tr><td><b>${esc(r.nombre) || '<span class="muted">(vacío)</span>'}</b><br><span class="muted small">Fila ${r.fila}</span></td><td>${esc(TIPOS[r.tipo] || (r.ex ? TIPOS[r.ex.tipo] : 'Insumo'))}</td><td class="money">${f(r.stock)}</td><td class="money">${f(r.stock_minimo)}</td><td class="money">${f(r.precio, 1)}</td><td><span class="st ${EST_IMP[r.estado][1]}">${esc(r.estado === 'error' ? r.motivo : EST_IMP[r.estado][0])}</span></td></tr>`).join('');
+  $('#impPrevInfo').textContent = `Mostrando ${prev.length} de ${impRes.length} filas${e ? ', primero las con error' : ''}`;
+  const sinNombre = impMap.nombre < 0;
+  $('#impSum').innerHTML = `<h2 style="margin:0">Resumen</h2>
+    ${sinNombre ? '<p class="msg bad" style="margin:0">Elige qué columna tiene el <b>nombre</b> del producto.</p>' : ''}
+    <div class="g" style="gap:10px"><div class="row"><span>Productos nuevos</span><b class="sp" style="font-size:22px;color:#1F7A47">${n}</b></div><div class="row"><span>Se actualizan</span><b class="sp" style="font-size:22px;color:var(--acc)">${a}</b></div><div class="row"><span>Con error, no se importan</span><b class="sp" style="font-size:22px;color:var(--warn)">${e}</b></div></div>
+    <p class="muted small" style="margin:0">En los que ya existen se actualizan precio, costo, mínimo y stock. El cambio de stock queda registrado como ajuste, con tu nombre.</p>
+    <button type="button" class="b pri" id="btnImpGo" ${sinNombre || !(n + a) ? 'disabled' : ''}>Importar ${n + a} producto${n + a === 1 ? '' : 's'}</button>
+    ${e ? '<button type="button" class="b" id="btnImpErr">Descargar filas con error (.xlsx)</button>' : ''}
+    <button type="button" class="linkb" id="btnImpOtro">Elegir otro archivo</button>`;
+}
+async function impLeer(file) {
+  if (!file) return;
+  try {
+    await cargarXLSX();
+    const wb = XLSX.read(await file.arrayBuffer(), { type: 'array' });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: true, blankrows: false });
+    if (rows.length < 2) { toast('El archivo no tiene filas con datos'); return; }
+    impHeaders = rows[0].map((h) => String(h ?? '').trim());
+    const w = impHeaders.length; impRows = rows.slice(1).map((r) => [...r, ...Array(Math.max(0, w - r.length)).fill('')].slice(0, Math.max(w, r.length))).filter((r) => r.some((c) => String(c ?? '').trim() !== ''));
+    impFileName = `${file.name}${wb.SheetNames.length > 1 ? ` (hoja “${wb.SheetNames[0]}”)` : ''}`;
+    impAutoMap(); renderImport();
+  } catch (err) { banner('No se pudo leer el archivo: ' + (err.message || err) + '. Guárdalo como .xlsx o .csv e inténtalo de nuevo.'); }
+}
+$('#impInput').addEventListener('change', (e) => { impLeer(e.target.files[0]); e.target.value = ''; });
+const dz = $('#impDrop');
+['dragenter', 'dragover'].forEach((ev) => dz.addEventListener(ev, (e) => { e.preventDefault(); dz.classList.add('over'); }));
+['dragleave', 'drop'].forEach((ev) => dz.addEventListener(ev, (e) => { e.preventDefault(); dz.classList.remove('over'); }));
+dz.addEventListener('drop', (e) => impLeer(e.dataTransfer.files[0]));
+$('#impMap').addEventListener('change', (e) => { const s = e.target.closest('[data-impf]'); if (s) { impMap[s.dataset.impf] = Number(s.value); renderImport(); } });
+$('#btnImport').onclick = () => { if (!ready()) return; impHeaders = []; impRows = []; renderImport(); show('vImport'); };
+$('#btnPlantilla').onclick = async () => {
+  await cargarXLSX();
+  const ws = XLSX.utils.aoa_to_sheet([['Nombre', 'Tipo', 'Unidad', 'Stock', 'Stock mínimo', 'Costo neto', 'Precio neto'], ['Jeringa 3 ml', 'Insumo', 'unidad', 120, 30, 80, 150], ['Vacuna óctuple', 'Medicamento', 'dosis', 24, 5, 7000, 15000], ['Consulta general', 'Servicio', 'atención', '', '', '', 18000], ['Esterilización hembra hasta 10 kg', 'Procedimiento', 'cirugía', '', '', '', 85000]]);
+  ws['!cols'] = [{ wch: 34 }, { wch: 14 }, { wch: 10 }, { wch: 8 }, { wch: 13 }, { wch: 11 }, { wch: 12 }];
+  const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Inventario'); XLSX.writeFile(wb, 'Plantilla_inventario_TuCitaVet.xlsx');
+};
+$('#impSum').addEventListener('click', async (e) => {
+  if (e.target.closest('#btnImpOtro')) return $('#impInput').click();
+  if (e.target.closest('#btnImpErr')) {
+    await cargarXLSX();
+    const errs = impRes.filter((r) => r.estado === 'error');
+    const ws = XLSX.utils.aoa_to_sheet([[...impHeaders, 'Error'], ...errs.map((r) => [...r.raw, `Fila ${r.fila}: ${r.motivo}`])]);
+    const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Con error'); XLSX.writeFile(wb, 'Filas_con_error.xlsx'); return;
+  }
+  const go = e.target.closest('#btnImpGo'); if (!go || !ready()) return;
+  go.disabled = true;
+  const has = (k) => impMap[k] >= 0, nuevos = impRes.filter((r) => r.estado === 'nuevo'), upd = impRes.filter((r) => r.estado === 'actualiza');
+  const nz = (v) => (isNaN(v) ? 0 : v);
+  let hechos = 0; const total = nuevos.length + upd.length;
+  const prog = () => { go.textContent = `Importando… ${hechos} de ${total}`; };
+  try {
+    for (let i = 0; i < nuevos.length; i += 100) {
+      const lote = nuevos.slice(i, i + 100);
+      const filas = lote.map((r) => { const tipo = r.tipo || 'insumo'; return { nombre: r.nombre, tipo, unidad: r.unidad || 'unidad', controla_stock: (has('stock') && !isNaN(r.stock)) || ['insumo', 'medicamento'].includes(tipo), stock_minimo: nz(r.stock_minimo), costo: nz(r.costo), precio: nz(r.precio), activo: true }; });
+      const ins = await q(sb.from('productos').insert(filas).select('id,nombre'));
+      const idDe = new Map(ins.map((x) => [normTxt(x.nombre), x.id]));
+      const movs = lote.filter((r) => has('stock') && nz(r.stock) > 0).map((r) => ({ producto_id: idDe.get(normTxt(r.nombre)), tipo: 'entrada', cantidad: r.stock, motivo: `Importado desde Excel (${impFileName.slice(0, 60)})`, por: myId })).filter((m) => m.producto_id);
+      if (movs.length) await q(sb.from('movimientos').insert(movs));
+      hechos += lote.length; prog();
+    }
+    for (const r of upd) {
+      const ch = {};
+      if (has('precio') && !isNaN(r.precio)) ch.precio = r.precio;
+      if (has('costo') && !isNaN(r.costo)) ch.costo = r.costo;
+      if (has('stock_minimo') && !isNaN(r.stock_minimo)) ch.stock_minimo = r.stock_minimo;
+      if (has('unidad') && r.unidad) ch.unidad = r.unidad;
+      if (has('tipo') && r.tipo) ch.tipo = r.tipo;
+      if (Object.keys(ch).length) await q(sb.from('productos').update(ch).eq('id', r.ex.id));
+      if (has('stock') && !isNaN(r.stock)) {
+        const diff = r.stock - Number(r.ex.stock || 0);
+        if (!r.ex.controla_stock) await q(sb.from('productos').update({ controla_stock: true }).eq('id', r.ex.id));
+        if (diff) await q(sb.from('movimientos').insert({ producto_id: r.ex.id, tipo: 'ajuste', cantidad: diff, motivo: 'Ajuste por importación desde Excel', por: myId }));
+      }
+      hechos++; prog();
+    }
+    impSteps(3);
+    await reloadAll(); toast(`Listo: ${nuevos.length} nuevos y ${upd.length} actualizados`); show('vInventario');
+  } catch (err) { banner(`Se importaron ${hechos} de ${total} antes del error: ${errMsg(err)}`); go.disabled = false; go.textContent = 'Reintentar'; await reloadAll(); }
+});
+
+/* ---------- Buscador desplegable (cotizaciones y recetas) ---------- */
+const combo = $('#combo'); let cbInput = null, cbItems = [], cbSel = 0;
+const escRe = (t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+function cbSource(inp) { const act = productos.filter((p) => p.activo); return inp.classList.contains('m-med') ? (act.some((p) => p.tipo === 'medicamento') ? act.filter((p) => p.tipo === 'medicamento') : act) : act; }
+function cbHide() { combo.classList.remove('on'); cbInput = null; }
+function cbPlace() {
+  if (!cbInput) return; const r = cbInput.getBoundingClientRect(), w = Math.min(Math.max(r.width, 340), innerWidth - 16);
+  combo.style.left = Math.max(8, Math.min(r.left, innerWidth - w - 8)) + 'px'; combo.style.width = w + 'px';
+  const below = innerHeight - r.bottom > 240 || r.top < 260; combo.style.top = below ? r.bottom + 4 + 'px' : ''; combo.style.bottom = below ? '' : innerHeight - r.top + 4 + 'px';
+}
+function cbShow(inp) {
+  cbInput = inp; const qv = normTxt(inp.value), src = cbSource(inp);
+  cbItems = src.filter((p) => !qv || normTxt(p.nombre).includes(qv)).sort((a, b) => normTxt(a.nombre).indexOf(qv) - normTxt(b.nombre).indexOf(qv) || a.nombre.localeCompare(b.nombre)).slice(0, 8);
+  if (!cbItems.length || (cbItems.length === 1 && cbItems[0].nombre === inp.value)) { combo.classList.remove('on'); return; }
+  cbSel = Math.min(cbSel, cbItems.length - 1);
+  const hl = (n) => { const t = inp.value.trim(); if (!t) return esc(n); const m = n.match(new RegExp(escRe(t), 'i')); return m ? esc(n.slice(0, m.index)) + '<mark>' + esc(m[0]) + '</mark>' + esc(n.slice(m.index + m[0].length)) : esc(n); };
+  combo.innerHTML = cbItems.map((p, i) => `<button type="button" role="option" aria-selected="${i === cbSel}" class="${i === cbSel ? 'on' : ''}" data-cb="${i}"><span>${hl(p.nombre)}</span><b class="money">${CLP(p.precio)}</b><small class="${bajo(p) ? 'low' : ''}">${esc(TIPOS[p.tipo] || p.tipo)}${p.controla_stock ? `, ${esc(String(p.stock))} ${esc(p.unidad)}${bajo(p) ? ', bajo el mínimo' : ''}` : ''}</small><small style="text-align:right">neto</small></button>`).join('') + '<div class="muted small" style="padding:6px 10px 2px">Flechas para moverte, Enter para elegir</div>';
+  combo.classList.add('on'); cbPlace();
+}
+function cbPick(i) {
+  const p = cbItems[i]; if (!p || !cbInput) return; const inp = cbInput;
+  inp.value = p.nombre;
+  if (inp.classList.contains('it-desc')) { const pr = inp.closest('tr').querySelector('.it-precio'); pr.value = p.precio; }
+  cbHide(); inp.dispatchEvent(new Event('input', { bubbles: true })); cbHide();
+  const next = inp.closest('tr').querySelector(inp.classList.contains('it-desc') ? '.it-cant' : '.m-pres'); if (next) next.focus();
+}
+const isCb = (el) => el && el.matches && el.matches('.it-desc, .m-med');
+document.addEventListener('focusin', (e) => { if (isCb(e.target)) { cbSel = 0; cbShow(e.target); } });
+document.addEventListener('input', (e) => { if (isCb(e.target) && e.isTrusted) { cbSel = 0; cbShow(e.target); } });
+document.addEventListener('keydown', (e) => {
+  if (!isCb(e.target) || !combo.classList.contains('on')) return;
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); cbSel = (cbSel + (e.key === 'ArrowDown' ? 1 : -1) + cbItems.length) % cbItems.length; cbShow(e.target); }
+  else if (e.key === 'Enter') { e.preventDefault(); cbPick(cbSel); }
+  else if (e.key === 'Escape') cbHide();
+});
+document.addEventListener('focusout', (e) => { if (isCb(e.target)) setTimeout(() => { if (document.activeElement !== cbInput) cbHide(); }, 120); });
+combo.addEventListener('mousedown', (e) => e.preventDefault());
+combo.addEventListener('click', (e) => { const b = e.target.closest('[data-cb]'); if (b) cbPick(Number(b.dataset.cb)); });
+addEventListener('resize', cbPlace); addEventListener('scroll', cbPlace, true);
 
 /* ---------- Respaldo (solo administradores) ---------- */
 const stampFile = () => { const d = new Date(), p = (n) => String(n).padStart(2, '0'); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}`; };
@@ -1301,11 +1533,20 @@ const salir = async () => { try { await sb.auth.signOut(); } catch {} location.r
 $('#btnSalir').onclick = $('#btnSalir2').onclick = $('#btnSalir3').onclick = salir;
 $('#btnReintentar').onclick = () => { started = false; start(); };
 
-async function start() {
+let starting = null;
+function start() {
+  if (starting) return starting;
+  starting = start2().finally(() => { starting = null; });
+  return starting;
+}
+async function start2() {
   if (started || !session || inRecovery) return;
   myId = session.user.id;
   let perfil = null;
-  const { data, error } = await sb.rpc('registrarme');
+  let { data, error } = await sb.rpc('registrarme');
+  if (error && /duplicate key|perfiles_pkey/i.test(error.message || '')) {
+    ({ data, error } = await sb.rpc('registrarme'));
+  }
   if (error) {
     showAuth('pConfig');
     $('#pConfig').innerHTML = '<h2>No se pudo conectar con la base de datos</h2><p style="margin:0">Revisa que ejecutaste <b>schema.sql</b> y que agregaste <b>vet</b> en “Exposed schemas” (guía, paso 2). Detalle: <span id="cfgErr"></span></p><div class="row"><button class="b" id="btnSalir4">Cerrar sesión</button></div>';
